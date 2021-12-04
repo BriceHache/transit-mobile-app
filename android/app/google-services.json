@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "798742417637",
+    "firebase_url": "https://ctimobile-38f51-default-rtdb.firebaseio.com",
+    "project_id": "ctimobile-38f51",
+    "storage_bucket": "ctimobile-38f51.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798742417637:android:6b41a525d9b6e7e5ec840c",
+        "android_client_info": {
+          "package_name": "com.viral.budget_planner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "798742417637-dgugbofts78il3sbf611uir3o7euo6bk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhywGd_l5290Zsg8wUFYWLGKtgyEU188I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "798742417637-dgugbofts78il3sbf611uir3o7euo6bk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
