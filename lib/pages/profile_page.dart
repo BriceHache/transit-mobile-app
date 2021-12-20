@@ -11,6 +11,7 @@ import 'package:ball_on_a_budget_planner/helpers/helpers.dart';
 import 'package:ball_on_a_budget_planner/helpers/show_alert.dart';
 import 'package:ball_on_a_budget_planner/models/user.dart';
 import 'package:ball_on_a_budget_planner/pages/auth/welcome_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key key}) : super(key: key);
@@ -26,21 +27,25 @@ class _ProfilePageState extends State<ProfilePage> {
    User currentUser;
    UserModel user;
    bool haveUser;
+   FlutterSecureStorage _storage;
 
 
     @override
   void initState() {
     super.initState();
+    _storage = new FlutterSecureStorage();
      signinBloc = BlocProvider.of<SignInBloc>(context);
      profileBloc = BlocProvider.of<ProfileBloc>(context);
      isSigningOut = false;
      haveUser = false;
      signinBloc.add(GetCurrentUser());
      signinBloc.listen((state) {
-      /*if (state is GetCurrentUserCompleted) {
-        currentUser = state.firebaseUser;
-        profileBloc.add(GetProfileDetailsEvent(currentUser.uid));
-      }*/
+      if (state is GetCurrentUserCompleted) {
+        //currentUser = state.firebaseUser;
+        String userId =  _storage.read(key: 'userId') as String;
+       // profileBloc.add(GetProfileDetailsEvent(currentUser.uid));
+        profileBloc.add(GetProfileDetailsEvent(userId));
+      }
       });
 
 
@@ -53,6 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
         body: BlocListener<SignInBloc, SignInBlocState>(
         listener: (context, state) {
+          print('state: ' + isSigningOut.toString());
           if (state is SignOutProgressState) {
             isSigningOut = true;
           }

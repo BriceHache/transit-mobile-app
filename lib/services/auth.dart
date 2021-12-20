@@ -82,22 +82,29 @@ class AuthASP  {
               headers: {"Content-Type": "application/x-www-form-urlencoded"},
               body: loginInfo
         );
-       // alice.onHttpResponse(response);
+
         if (response.statusCode == 200) {
           resp.error = '200';
           final json = jsonDecode(response.body);
           Globals.token = json['access_token'] as String;
         }
         else {
+          print('response status : ' + response.statusCode.toString());
           //this call will fail if the security stamp for user is null
           resp.error = response.statusCode.toString() + ' ' + response.body;
           return resp;
         }
 
     }
-
-
     catch (e){
+      if(e is SocketException){
+        resp.error = " Vérifiez votre connexion internet";
+      }
+      else if(e is TimeoutException){
+
+        resp.error = " Délai d'attente dépassé.";
+      }
+      else
       resp.error = e.message;
     }
     return   resp ;

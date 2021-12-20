@@ -1,5 +1,5 @@
 {
-    "app_name": "Ball sur un budget",
+    "app_name": "CTI",
 
     "_comment": "écran de connexion",
     "login_email": "Connexion par e-mail",
@@ -59,6 +59,8 @@
     "edit": "Modifier le profil",
     "tools": "Aide & Outils",
     "categories_list": "Catégories",
+
+    "logout": "Déconnexion",
 
 
 
@@ -260,6 +262,7 @@
     "add_reglement":  "Ajouter un règlement client",
     "add_dossier":  "Ajouter un dossier",
     "add_dossier_depense":  "Ajouter une dépense sur dossier",
+    "add_piece_jointe":  "Joindre une pièce à un dossier",
     "total_dossiers":  "Total dossiers",
     "chiffreaffaire_s":  "Chiffre d'affaires : ",
     "reglementsc":  "Règlements : ",
@@ -291,6 +294,18 @@
     "ANNULER" : "ANNULER",
     "numero_document" : "N° du document",
 
+    "comment" : "Commentaires",
+    "etd" : "ETD",
+    "eta" : "ETA",
+    "transporteur" : "Transporteur",
+    "armateur" : "Armateur",
+    "Amount" : "Montant",
+    "numero_eir" : "N° EIR",
+
+    "select_dossier": "Selectionner un dossier",
+    "select_object": "Selectionner l'objet ",
+    "mandatory_object": "L'objet est obligatoire.",
+
     "today": "Aujourdhui",
     "this_week": "Cette semaine",
     "this_month": "Ce mois",
@@ -305,11 +320,13 @@
     "customized": "Personnalisée",
     "piece_jointe": "PIECE jointe : ",
     "aucun": "Aucun",
-    "select_doc_type": "---Selectionner---",
+    "select_doc_type": "Selectionner un type de document",
+    "add_a_fee": "Ajouter des frais",
 
     "ask_delete_doc": "Voulez-vous vraiment supprimer ce document ?",
     "warnig_delete_doc": "Cette action supprimera définitivement votre document.",
     "add_document_number": "Ajouter un N° de document",
     "document_saved": "Document enregistré avec succès",
     "select_file": "Vous devez selectionner un fichier (pdf)"
+
 }

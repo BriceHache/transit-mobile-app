@@ -5,6 +5,7 @@ import 'package:ball_on_a_budget_planner/helpers/dialog.dart';
 import 'package:ball_on_a_budget_planner/helpers/styles_custom.dart';
 import 'package:ball_on_a_budget_planner/models/get_documents_non_rattaches_dossier.dart';
 import 'package:ball_on_a_budget_planner/models/get_pieces_jointes_dossier.dart';
+import 'package:ball_on_a_budget_planner/models/key_value.dart';
 import 'package:ball_on_a_budget_planner/widgets/button_widget.dart';
 import 'package:ball_on_a_budget_planner/widgets/labels.dart';
 import 'package:ball_on_a_budget_planner/widgets/large_button.dart';
@@ -18,7 +19,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:smart_select/smart_select.dart';
+import 'package:searchable_dropdown/searchable_dropdown.dart';
 import 'package:tuple/tuple.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -32,8 +33,9 @@ import '../banklin_icons.dart';
 class PieceJointeDossiersPage extends StatefulWidget {
 
   final GetDossier dossier;
+  final  bool showDossiers ;
 
-  const PieceJointeDossiersPage({Key key, this.dossier}) : super(key: key);
+  const PieceJointeDossiersPage({Key key, this.dossier,this.showDossiers = false}) : super(key: key);
 
   @override
   _PieceJointeDossierPageState createState() => _PieceJointeDossierPageState(
@@ -48,6 +50,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
   _PieceJointeDossierPageState(
       this.dossier
       );
+  bool _showDossiers;
 
   bool _isUpdating;
   bool _isCreating;
@@ -67,7 +70,12 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
 
   List<DocumentDossier> _documentsDossiers;
 
-  DocumentDossier selectedDocument;
+  //DocumentDossier selectedDocument;
+  String selectedDocument;
+
+  String selectedDossier;
+  List<KeyValueModel> _ensDossiers;
+  List<KeyValueModel> _filterDossiers;
 
   List<DocumentDossier> _filterDocumentsDossiers;
 
@@ -88,13 +96,11 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
   String _extension;
   bool _isLoading = false;
   bool _userAborted = false;
-  bool _multiPick = false;
+  bool _multiPick = true;
  // FileType _pickingType = FileType.any;
   FileType _pickingType = FileType.custom;
   TextEditingController _controller = TextEditingController();
- 
 
-  
   @override
   void initState() {
 
@@ -113,12 +119,19 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
     response_status_docs = "ongoing";
     selectDocMessage = "aucun".tr();
    // Color addDocColor = ;
-    selectedDocument = null;
+   // selectedDocument = null;
+
+    _ensDossiers = [];
+    _filterDossiers = [];
+
+    _showDossiers = widget.showDossiers;
 
     _controller.addListener(() => _extension = _controller.text);
     _getPiecesJointes();
 
     _getDocumentsNonRattaches();
+
+    _getEnsDossiers();
 
 
   }
@@ -204,6 +217,39 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
     });
   }
 
+  _getEnsDossiers() {
+    _showProgress('Chargement des dossiers...');
+    Future<Tuple2<List<KeyValueModel>, String>> dossiersGlobalResponse =  ApiProvider.GetAllDossiersKV();
+    dossiersGlobalResponse.then((_realResponse) {
+      setState(() {
+        _ensDossiers = _realResponse.item1;
+        _filterDossiers = _realResponse.item1;
+
+        print("Ensemble dossiers : ");
+        print(_filterDossiers);
+        print("Message:  ");
+        print(_realResponse.item2);
+
+        if(_realResponse.item2 == "Success"){
+
+          response_status_docs = "success";
+
+        }else if(_realResponse.item2 == "Error"){
+
+          response_status_docs = "error";
+
+        }else {
+          response_status_docs = "connexion_failed";
+        }
+
+      });
+
+      print("Length dossiers ${_realResponse.item1.length}");
+
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -253,37 +299,118 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                                   Button(icon: FontAwesomeIcons.plus, title: 'add_a_doc'.tr(), callback: _addDocument, color:Colors.blueGrey,paddingLeft: 5, paddingRight: 5)
                                 ]
                             )
+                        ),
+
+                        (_isCreating && _showDossiers)
+                        ? Container(
+                            margin: EdgeInsets.all(10.0),
+                            //  padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+                            child: SearchableDropdown.single(
+                            items: _filterDossiers.map((KeyValueModel value) {
+                            return DropdownMenuItem(
+                            value: value,
+                            child: Text(value.Text,
+                            // style: TextStyle(color: Colors.black)
+                            ),
+                            );
+                            }).toList(),
+                            //  _filterDossiers,
+                            value: selectedDossier,
+                            menuBackgroundColor: Colors.white,
+                            style: customStyle(Colors.white, 16, FontWeight.normal),
+                            hint: Text('select_dossier'.tr(),style: customStyle(Colors.white, 16, FontWeight.normal)),
+                            searchHint: 'select_dossier'.tr(),
+                            onChanged: (selected) {
+                                setState(() {
+                                    if(selected != null){
+                                        selectedDossier = selected.Text;
+                                        pieceJointe.dossier_id = int.parse(selected.Value);
+                                    }else{
+                                        selectedDossier = 'select_dossier'.tr();
+                                    }
+                                });
+                            },
+                            isExpanded: true,
+                            searchFn: (String keyword, items) {
+                            List<int> ret = List<int>.empty(growable: true);
+
+                            if (keyword != null && items != null && keyword.isNotEmpty) {
+                              keyword.split(" ").forEach((k) {
+                              int i = 0;
+                              items.forEach((item) {
+                              if (k.isNotEmpty &&
+                              (item.value.Text
+                                  .toString()
+                                  .toLowerCase()
+                                  .contains(k.toLowerCase()))) {
+                              ret.add(i);
+                              }
+                              i++;
+                              });
+                              });
+                            }
+                            if (keyword.isEmpty) {
+                                ret = Iterable<int>.generate(items.length).toList();
+                            }
+                            return (ret);
+                            },
+                            ),
                         )
-                        ,
+                            : Container(),
+
                         _isCreating
                             ? Container(
                           //padding: EdgeInsets.only(left: 20, right: 20, top: 5,),
                             child: Column(
                                 children: [
-                                  SmartSelect<DocumentDossier>.single(
-                                    title: 'select_doc_type'.tr(),
-                                    value: selectedDocument,
-                                    choiceItems: S2Choice.listFrom<DocumentDossier, DocumentDossier>(
-                                      source: _filterDocumentsDossiers,
-                                      value: (index, item) => item,
-                                      title: (index, item) => item.nom_abrege,
-                                    ),
-                                    //choices.os,
-                                    onChange: (selected) => setState(() => selectedDocument = selected.value),
-                                    //modalType: S2ModalType.bottomSheet,
-                                    modalType: S2ModalType.popupDialog,
-                                    tileBuilder: (context, state) {
-                                      return S2Tile.fromState(
-                                        state,
-                                        isTwoLine: true,
-                                        leading: const CircleAvatar(
-                                          backgroundImage: NetworkImage(
-                                            'https://source.unsplash.com/xsGxhtAsfSA/100x100',
-                                          ),
+                                  SearchableDropdown.single(
+                                    items: _filterDocumentsDossiers.map((DocumentDossier value) {
+                                      return DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value.nom_abrege,
+                                          // style: TextStyle(color: Colors.black)
                                         ),
                                       );
+                                    }).toList(),
+                                    //  _filterDossiers,
+                                    value: selectedDocument,
+                                    hint: Text('select_doc_type'.tr(),style: customStyle(Colors.white, 16, FontWeight.normal)),
+                                    searchHint: 'select_doc_type'.tr(),
+                                    onChanged: (selected) {
+                                      setState(() {
+                                        if(selected != null){
+                                          selectedDocument = selected.nom_abrege;
+                                        }else{
+                                          selectedDocument = 'select_doc_type'.tr();
+                                        }
+                                      });
                                     },
-                                  )
+                                    isExpanded: true,
+                                    searchFn: (String keyword, items) {
+                                      List<int> ret = List<int>.empty(growable: true);
+
+                                      if (keyword != null && items != null && keyword.isNotEmpty) {
+                                        keyword.split(" ").forEach((k) {
+                                          int i = 0;
+                                          items.forEach((item) {
+                                            if (k.isNotEmpty &&
+                                                (item.value.nom_abrege
+                                                    .toString()
+                                                    .toLowerCase()
+                                                    .contains(k.toLowerCase()))) {
+                                              ret.add(i);
+                                            }
+                                            i++;
+                                          });
+                                        });
+                                      }
+                                      if (keyword.isEmpty) {
+                                        ret = Iterable<int>.generate(items.length).toList();
+                                      }
+                                      return (ret);
+                                    },
+                                  ),
+
                                 ]
                             )
                         )
@@ -330,20 +457,18 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                             children: <Widget>[
                               ElevatedButton(
                                 onPressed: () => _pickFiles(),
-                                child: Text(_multiPick ? 'Sélectionner les fichiers' : 'Selectionner le document (pdf) '),
+                                child: Text(_multiPick ? 'Sélectionner le(s) fichier(s) : pdf' : 'Selectionner le document (pdf) '),
                               ),
 
                               SizedBox(height: 20),
-                              Text("Document sélectionné : ", style:  TextStyle(color: Colors.blue),),
-
-
+                            /*  Text("Document sélectionné : ", style:  TextStyle(color: Colors.blue),),
 
                               (_paths == null) ?
                               Text(selectDocMessage, style: TextStyle(color: Colors.red))
                               :
                               Text(_fileName, style: TextStyle(color: Colors.green)),
 
-                              SizedBox(height: 30),
+                              SizedBox(height: 30),*/
 
                             ],
                           ) ,
@@ -608,7 +733,8 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
           ? Padding(
         padding: const EdgeInsets.only(bottom: 10.0),
         child: const Text(
-          'User has aborted the dialog',
+          //'User has aborted the dialog',
+          '',
           style: TextStyle(color: Colors.white),
         ),
       )
@@ -635,8 +761,9 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                 final bool isMultiPath =
                     _paths != null &&
                         _paths.isNotEmpty;
+                int realIndex = index + 1;
                 final String name =
-                   // 'File $index: ' +
+                    'Fichier $realIndex: ' +
                     //'Document : ' +
                         (isMultiPath
                             ? _paths
@@ -652,8 +779,8 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
 
                 return ListTile(
                   title: Text(
-                    '',
-                    //name,
+                    //'',
+                    name,
                     style: TextStyle(color: Colors.white),
                   ),
                   /*subtitle: Text(path ?? '',

@@ -1,5 +1,5 @@
 {
-    "app_name": "Ball on a budget",
+    "app_name": "CTI",
 
     "_comment": "login screen",
     "login_email": "Email SignIn",
@@ -59,9 +59,15 @@
     "tools": "Helps & Tools",
     "categories_list": "Categories",
 
+    "logout": "Logout",
+    "add_piece_jointe": "Join document to Affair",
 
-
-
+    "comment" : "Comments",
+    "etd" : "ETD",
+    "eta" : "ETA",
+    "transporteur" : "Transporter",
+    "Amount" : "Amount",
+    "armateur" : "Armateur",
 
     "emblem": "Reach Your Goals Even Faster",
 

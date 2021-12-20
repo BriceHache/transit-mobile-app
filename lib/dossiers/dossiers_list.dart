@@ -169,51 +169,55 @@ class _DossiersState extends State<DossiersPage> {
   // Let's add a searchfield to search in the DataTable.
   searchField() {
     return
-     // Padding(
       Row(
-        mainAxisSize: MainAxisSize.min,
-     // padding: EdgeInsets.all(5.0),
-      children: [
-        
-      Flexible(
-        child: TextField(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 100,
+              width: 300,
+              child:
+                Column(
+                  children: [
+                    Expanded (
+                      child: TextField(
 
-          decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(5.0),
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(5.0),
 
-              hintText: 'Filtrer (N° de dossier / nom du client)',
-              fillColor: Colors.white,
-              hintStyle: TextStyle(color: Colors.grey)
+                            hintText: 'Filtrer (N° de dossier / nom du client)',
+                            fillColor: Colors.white,
+                            hintStyle: TextStyle(color: Colors.grey)
 
+                        ),
 
-          ),
+                        style: TextStyle(color: Colors.white),
+                        onChanged: (string) {
 
-          style: TextStyle(color: Colors.white),
-          onChanged: (string) {
-            // We will start filtering when the user types in the textfield.
-            // Run the debouncer and start searching
+                          // Filter the original List and update the Filter list
+                          setState(() {
+                            _isloading = true;
+                            _filterDossiers = _dossiers
+                                .where((u) => (u.numero_dossier
+                                .toLowerCase()
+                                .contains(string.toLowerCase()) ||
+                                u.ClientName.toLowerCase().contains(string.toLowerCase())))
+                                .toList();
 
-            //  _debouncer.run(() {
-            // Filter the original List and update the Filter list
-            setState(() {
-              _isloading = true;
-              _filterDossiers = _dossiers
-                  .where((u) => (u.numero_dossier
-                  .toLowerCase()
-                  .contains(string.toLowerCase()) ||
-                  u.ClientName.toLowerCase().contains(string.toLowerCase())))
-                  .toList();
+                            _isloading = false;
 
-              _isloading = false;
+                          });
 
-            });
+                          //});
+                        },
+                      ),
+                    ),
+                  ],
 
-            //});
-          },
-        ),
-      ),
-      ]
-    );
+                )
+              ,
+            ),
+          ]
+      );
   }
 
   @override
@@ -228,7 +232,6 @@ class _DossiersState extends State<DossiersPage> {
                       scrollDirection: Axis.horizontal,
                       child :
                      Container(
-
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
@@ -236,7 +239,7 @@ class _DossiersState extends State<DossiersPage> {
                               _rangeDate(),
                               _customizedRangeDateSelect(),
                               _selectPeriode(),
-                              //searchField(),
+                              searchField(),
 
                            (response_status != "connexion_failed") ?
 
@@ -313,8 +316,8 @@ class _DossiersState extends State<DossiersPage> {
                   width: 40,
 
                       child: Text(
-                        'N°',
-                        style: TextStyle(color: Colors.blue),
+                        'N° dossier',
+                        style: TextStyle(color: Colors.blue, fontSize: 8.5),
                         textAlign: TextAlign.left,
                       ),
 
@@ -330,7 +333,7 @@ class _DossiersState extends State<DossiersPage> {
                     child: Center(
                       child: Text(
                         'Client',
-                        style: TextStyle(color: Colors.blue),
+                        style: TextStyle(color: Colors.blue, fontSize: 8.5),
                       ),
                     ),
                   )
@@ -338,17 +341,30 @@ class _DossiersState extends State<DossiersPage> {
                 DataColumn(label: _verticalDivider),
                 // Lets add one more column to show a see button and update button
                 DataColumn(
+                    label: Container(
+                      padding: EdgeInsets.all(0.0),
+                      width: 50,
+                      child: Center(
+                        child: Text(
+                          'Statut',
+                          style: TextStyle(color: Colors.blue, fontSize: 8.5),
+                        ),
+                      ),
+                    )
+                )
+                /*DataColumn(
                   label: Container(
                     padding: EdgeInsets.all(0.0),
                     width: 50,
                     child: Center(
                       child: Text(
                         'Actions',
-                        style: TextStyle(color: Colors.blue),
+                        style: TextStyle(color: Colors.blue, fontSize: 8.5),
                       ),
                     ),
                   )
-                )
+                )*/
+
               ],
               // the list should show the filtered list now
               rows: _filterDossiers.length > 0 ? _filterDossiers
@@ -413,6 +429,17 @@ class _DossiersState extends State<DossiersPage> {
                             mainAxisSize: MainAxisSize.max,
                            // mainAxisAlignment: MainAxisAlignment.start,
                             children: [
+                              Expanded(
+                                child: Text(
+                                    dossier.StatusName.toUpperCase(),
+                                  style:  TextStyle(
+                                      color:
+                                      dossier.couleur_label.contains('rgb') ? Colors.red : Color(int.parse(dossier.couleur_label.replaceAll('#', '0xff'))),
+                                      fontSize: 10.0
+                                  ),
+                                    maxLines: 3,
+                                )
+                              )
                               /*Expanded(child:  IconButton(
                                   icon: Icon(Icons.remove_red_eye, color: Colors.white,),
                                   iconSize: 18.0,
@@ -424,7 +451,7 @@ class _DossiersState extends State<DossiersPage> {
                                   },
 
                               ), ),*/
-                              Expanded(
+                             /* Expanded(
                                 child: IconButton(
                                   icon: Icon(Icons.edit, color: Colors.green,),
                                   iconSize: 18.0,
@@ -447,12 +474,21 @@ class _DossiersState extends State<DossiersPage> {
                                   },
 
                                 ),
-                              )
+                              )*/
 
                             ],
                           ),
                         //),
-                      )
+                      ),
+                    onTap: () {
+                      _seeDossier(dossier);
+                      // Set the Selected employee to Update
+                      _selectedDossier = dossier;
+                      // Set flag updating to true to indicate in Update Mode
+                      setState(() {
+                        _isUpdating = true;
+                      });
+                    },
                     )
                 ]),
               )
@@ -619,7 +655,5 @@ class _DossiersState extends State<DossiersPage> {
     color: Colors.blue,
     thickness: 1,
   );
-
-
 
 }

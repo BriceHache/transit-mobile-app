@@ -166,152 +166,166 @@ class _DashboardPageState extends State<DashboardPage> {
              child: SingleChildScrollView(
              scrollDirection: Axis.horizontal,
                     child :
-                          Column(
-                            children: [
-                              Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Column(
-                                      children: [
-
-                                        NiceText(
-                                            DateFormat('dd/MM/yyyy').format(_startDate).toString(),
-                                            'debut'.tr(),
-                                            Colors.green, type: "date", textStyle: 12,)
-
-                                      ],
-
-                                    )
-                                    ,
-                                    Column(
-                                      children: [
-
-                                        NiceText(
-                                            DateFormat('dd/MM/yyyy').format(_endDate).toString(),
-                                            'fin'.tr(),
-                                            Colors.green,type: "date",textStyle: 12,)
-
-                                      ],
-
-                                    )
-
-                                  ]
-                              ),
-                              Row(
+                          Container(
+                            padding: EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Center(
-                                    child: DropdownButton<Tuple2<String,Tuple2<DateTime, DateTime>>>(
-                                      items: rangeDates.map((Tuple2<String,Tuple2<DateTime, DateTime>> value) {
-                                        return DropdownMenuItem<Tuple2<String,Tuple2<DateTime, DateTime>>>(
-                                          value: value,
-                                          child: Text(value.item1,
-                                           // style: TextStyle(color: Colors.black)
-                                            ),
-                                        );
-                                      }).toList(),
-                                      value: selectedValue,
-                                      focusColor: Colors.white,
-                                    //  dropdownColor: Colors.black,
-                                      dropdownColor: Colors.black,
+                              crossAxisAlignment: CrossAxisAlignment.center,
 
-                                      style: TextStyle(color: Colors.white),
-                                      onChanged: (Tuple2<String,Tuple2<DateTime, DateTime>> value) {
-                                        print(value);
-                                        setState(() {
-                                          selectedValue = value;
-                                        });
-                                        if(value.item1 != "customized".tr()) {
-                                          setDateRange(value.item2.item1, value.item2.item2);
-                                        }
-                                        //_startDate = value.item2.item1;
-                                        //_endDate = value.item2.item2;
-                                      },
-                                    ),
-                                  )
-                                  /*DropdownButton<String>(
-                                    items: <String>['Agrfggyh', 'Bhhhuii', 'Chhhhu', 'Dgggghhy'].map((String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
-                                    onChanged: (_) {},
-                                  )*/
-                                  /*Center(
-                                    child:
-                                   DropdownButton(
-                                      hint: Text('Please choose a location'), // Not necessary for Option 1
-                                      value: _selectedLocation,
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          _selectedLocation = newValue;
-                                        });
-                                      },
-                                      items: _locations.map((location) {
-                                        return DropdownMenuItem(
-                                          child: new Text(location),
-                                          value: location,
-                                        );
-                                      }).toList(),
-                                    )*/
-                                /*  Expanded(child:
-                                  _showPrefinedRangeDates(),
-                                  ),*/
+                              children: [
+                                Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    //mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
 
-                              ],),
+                                          NiceText(
+                                              DateFormat('dd/MM/yyyy').format(_startDate).toString(),
+                                              'debut'.tr(),
+                                              Colors.green, type: "date", textStyle: 12,)
 
-                              Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                        ],
+
+                                      )
+                                      ,
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+
+                                          NiceText(
+                                              DateFormat('dd/MM/yyyy').format(_endDate).toString(),
+                                              'fin'.tr(),
+                                              Colors.green,type: "date",textStyle: 12,)
+
+                                        ],
+
+                                      )
+
+                                    ]
+                                ),
+                                Row(
+                                mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    Column(
-                                      children: <Widget>[
-
-                                        //Expanded(child:
-                                        Container(
-
-                                            width:250,
-                                            padding: EdgeInsets.only(left: 5, right: 5),
-                                            child: Column(
-                                                children: [
-                                                  Container(height: 10,),
-                                                  LargeButton(
-                                                    onTap: () async{
-                                                      await displayDateRangePicker(context);
-                                                    },
-                                                    title: 'select_periode'.tr(),
-                                                    fontSize: 12,
-                                                  ),
-                                                  Container(height: 10,),
-                                                ]
-                                            )
-                                        ),
-                                        //)
-                                      ]
-                                     ),
-                                       //SizedBox(height: 30,),
-                                    /*Container(
-
-                                        width:250,
-                                        padding: EdgeInsets.only(left: 5, right: 5),
-                                        child: Column(
-                                            children: [
-                                              Container(height: 20,),
-                                              LargeButton(
-                                                onTap: () async{
-                                                  await displayDateRangePicker(context);
-                                                },
-                                                title: 'select_periode'.tr(),
-                                                fontSize: 18,
+                                    Center(
+                                      child: DropdownButton<Tuple2<String,Tuple2<DateTime, DateTime>>>(
+                                        items: rangeDates.map((Tuple2<String,Tuple2<DateTime, DateTime>> value) {
+                                          return DropdownMenuItem<Tuple2<String,Tuple2<DateTime, DateTime>>>(
+                                            value: value,
+                                            child: Text(value.item1,
+                                             // style: TextStyle(color: Colors.black)
                                               ),
-                                              Container(height: 20,),
-                                            ]
-                                        )
+                                          );
+                                        }).toList(),
+                                        value: selectedValue,
+                                        focusColor: Colors.white,
+                                      //  dropdownColor: Colors.black,
+                                        dropdownColor: Colors.black,
+
+                                        style: TextStyle(color: Colors.white),
+                                        onChanged: (Tuple2<String,Tuple2<DateTime, DateTime>> value) {
+                                          print(value);
+                                          setState(() {
+                                            selectedValue = value;
+                                          });
+                                          if(value.item1 != "customized".tr()) {
+                                            setDateRange(value.item2.item1, value.item2.item2);
+                                          }
+                                          //_startDate = value.item2.item1;
+                                          //_endDate = value.item2.item2;
+                                        },
+                                      ),
+                                    )
+                                    /*DropdownButton<String>(
+                                      items: <String>['Agrfggyh', 'Bhhhuii', 'Chhhhu', 'Dgggghhy'].map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                      onChanged: (_) {},
+                                    )*/
+                                    /*Center(
+                                      child:
+                                     DropdownButton(
+                                        hint: Text('Please choose a location'), // Not necessary for Option 1
+                                        value: _selectedLocation,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            _selectedLocation = newValue;
+                                          });
+                                        },
+                                        items: _locations.map((location) {
+                                          return DropdownMenuItem(
+                                            child: new Text(location),
+                                            value: location,
+                                          );
+                                        }).toList(),
+                                      )*/
+                                  /*  Expanded(child:
+                                    _showPrefinedRangeDates(),
                                     ),*/
 
-                                  ]),
-                              _buildStatistics()
-                            ],
+                                ],),
+
+                                Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+
+                                          //Expanded(child:
+                                          Container(
+
+                                              width:250,
+                                              padding: EdgeInsets.only(left: 5, right: 5),
+                                              child: Column(
+                                                  children: [
+                                                    Container(height: 10,),
+                                                    LargeButton(
+                                                      onTap: () async{
+                                                        await displayDateRangePicker(context);
+                                                      },
+                                                      title: 'select_periode'.tr(),
+                                                      fontSize: 12,
+                                                    ),
+                                                    Container(height: 10,),
+                                                  ]
+                                              )
+                                          ),
+                                          //)
+                                        ]
+                                       ),
+                                         //SizedBox(height: 30,),
+                                      /*Container(
+
+                                          width:250,
+                                          padding: EdgeInsets.only(left: 5, right: 5),
+                                          child: Column(
+                                              children: [
+                                                Container(height: 20,),
+                                                LargeButton(
+                                                  onTap: () async{
+                                                    await displayDateRangePicker(context);
+                                                  },
+                                                  title: 'select_periode'.tr(),
+                                                  fontSize: 18,
+                                                ),
+                                                Container(height: 20,),
+                                              ]
+                                          )
+                                      ),*/
+
+                                    ]),
+                                _buildStatistics()
+                              ],
+                            ),
                           ),
              ),
        ),
@@ -342,6 +356,7 @@ class _DashboardPageState extends State<DashboardPage> {
               } else if (state is StatisticsLoading) {
 
                 return _buildLoading();
+
               } else if (state is StatisticsLoaded) {
 
                 return _buildCard(context, state.statistics);
@@ -500,7 +515,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                       ]
                   ),
-                  Row(
+                  /*Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
 
@@ -562,8 +577,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
 
                       ]
-                  ),
-
+                  ),*/
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Image.asset('assets/images/icon.png',height: 200)
+                    ],
+                  )
                 ]
             );
           },

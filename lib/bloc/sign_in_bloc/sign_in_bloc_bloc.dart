@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ball_on_a_budget_planner/custom_models/UserResponse.dart';
+import 'package:ball_on_a_budget_planner/custom_models/user.dart';
 import 'package:bloc/bloc.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
@@ -30,9 +31,9 @@ class SignInBloc extends Bloc<SignInBlocEvent, SignInBlocState> {
     if(event is CheckIfSignedIn){
       yield*mapCheckIfSignedInToState();
     }
-   /* else  if (event is GetCurrentUser) {
+    else  if (event is GetCurrentUser) {
       yield* mapGetCurrentUserToState();
-    }*/
+    }
     /*else if (event is SignupWithGoogle) {
       yield* mapSignInWithGoogleEventToState();
     }*/
@@ -57,10 +58,10 @@ class SignInBloc extends Bloc<SignInBlocEvent, SignInBlocState> {
         firebaseUser: event.firebaseUser,
         loggedInVia: event.loggedInVia,
       );
-    }
+    }*/
     if (event is SignoutEvent) {
       yield* mapSignoutEventToState();
-    }*/
+    }
   }
 
   Stream<SignInBlocState> mapCheckIfSignedInToState() async* {
@@ -77,7 +78,7 @@ class SignInBloc extends Bloc<SignInBlocEvent, SignInBlocState> {
     }
   }
 
-   /*Stream<SignInBlocState> mapGetCurrentUserToState() async* {
+   Stream<SignInBlocState> mapGetCurrentUserToState() async* {
     try {
       User currentUser = await authenticationRepository.getCurrentUser();
       
@@ -90,7 +91,7 @@ class SignInBloc extends Bloc<SignInBlocEvent, SignInBlocState> {
       print(e);
       yield GetCurrentUserFailed();
     }
-  }*/
+  }
 
  /* Stream<SignInBlocState> mapSignInWithGoogleEventToState() async* {
     yield SignInInGoogleProgressState();

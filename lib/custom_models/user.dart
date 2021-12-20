@@ -18,7 +18,7 @@ class User{
   String username;
 
 
-  User({this.id,this.email,this.password});
+  User({this.id,this.email,this.password,this.role, this.username});
 
   /// A necessary factory constructor for creating a new User instance
   /// from a map. Pass the map to the generated `_$UserFromJson()` constructor.

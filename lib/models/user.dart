@@ -29,7 +29,7 @@ class UserModel {
       profileImageUrl: data['profileImageUrl'],
       loggedInVia: data['loggedInVia'],
     );
-  } 
+  }
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
@@ -40,5 +40,6 @@ class UserModel {
       loggedInVia: data['loggedInVia'],
     );
   }
+
 }
 

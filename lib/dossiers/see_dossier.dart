@@ -19,6 +19,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
+import 'frais_dossiers_list.dart';
+
 class SeeDossierPage extends StatefulWidget {
 
   final GetDossier dossier;
@@ -96,9 +98,9 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
                       _dossierCard(),
 
                     // Button(icon: FontAwesomeIcons.eye, title: 'voir_dossier'.tr(), callback: _edit, color:desactiveColor),
-                     Button(icon: FontAwesomeIcons.pen, title: 'edit_dossier'.tr(), callback: _edit, color:editColor),
+                    // Button(icon: FontAwesomeIcons.pen, title: 'edit_dossier'.tr(), callback: _edit, color:editColor),
                      Button(icon: FontAwesomeIcons.file, title: 'piece_jointe_dossier'.tr(), callback: _pieces_jointes, color:pieceJointeColor),
-                     Button(icon: FontAwesomeIcons.dollarSign, title: 'frais_sur_dossier'.tr(), callback: _edit, color:fraisDeDossierColor),
+                     Button(icon: FontAwesomeIcons.dollarSign, title: 'frais_sur_dossier'.tr(), callback: _frais_dossiers, color:fraisDeDossierColor),
                      ],
                    ),
                  )
@@ -275,6 +277,9 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
      Navigator.push(context, MaterialPageRoute(builder: (context) => PieceJointeDossiersPage(dossier: dossier)));
   }
 
+  void _frais_dossiers() async {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => FraisDossiersPage(dossier: dossier)));
+  }
 
 
 }

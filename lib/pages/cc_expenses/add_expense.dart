@@ -562,8 +562,6 @@ void _showCategory() {
     );
   }
 
- 
-
    void _submit() async {
     if(formkey.currentState.validate()){
       formkey.currentState.validate();

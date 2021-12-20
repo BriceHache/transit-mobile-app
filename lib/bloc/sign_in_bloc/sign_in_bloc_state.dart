@@ -14,13 +14,13 @@ class GetCurrentUserFailed extends SignInBlocState {
   @override
   String toString() => 'GetCurrentUserFailedState';
 }
-/*class GetCurrentUserCompleted extends SignInBlocState {
-  final User firebaseUser;
-  GetCurrentUserCompleted(this.firebaseUser);
+class GetCurrentUserCompleted extends SignInBlocState {
+  final User commonUser;
+  GetCurrentUserCompleted(this.commonUser);
 
   @override
   String toString() => 'GetCurrentUserCompletedState';
-}*/
+}
 
 //save to Firestore database 
 /*class SavingUserDb extends SignInBlocState {}

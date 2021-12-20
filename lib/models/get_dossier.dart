@@ -8,7 +8,6 @@ class GetDossier {
      String couleur_label;
      String StatusName ;
 
-
     GetDossier({
         this.id,
         this.ClientName,

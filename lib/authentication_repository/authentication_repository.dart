@@ -1,5 +1,6 @@
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ball_on_a_budget_planner/authentication_repository/base_repository.dart';
+import 'package:ball_on_a_budget_planner/custom_models/user.dart';
 import 'package:ball_on_a_budget_planner/services/auth_service.dart';
 
 class AuthenticationRepository extends BaseRepository{
@@ -32,7 +33,7 @@ class AuthenticationRepository extends BaseRepository{
 
   Future<bool> checkIfSignedIn() => authService.checkIfSignedIn();
 
- // Future<User> getCurrentUser() => authService.getCurrentUser();
+  Future<User> getCurrentUser() => authService.getCurrentUser();
 
  
 }

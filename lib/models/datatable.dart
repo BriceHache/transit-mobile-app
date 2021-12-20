@@ -29,7 +29,7 @@ class RequestParamDataTable {
 
         return {
          'iColumns': 18,
-         'iDisplayLength' :  10,
+         'iDisplayLength' :  500,
          'iDisplayStart' : 0,
          'iSortCol_0' : 0,
          'iSortingCols' : 1,
@@ -47,7 +47,7 @@ class RequestParamDataTable {
 
       return {
         'iColumns': 18,
-        'iDisplayLength' :  10,
+        'iDisplayLength' :  500,
         'iDisplayStart' : 0,
         'iSortCol_0' : 0,
         'iSortingCols' : 1,
@@ -65,7 +65,7 @@ class RequestParamDataTable {
 
       return {
         'iColumns': 18,
-        'iDisplayLength' :  10,
+        'iDisplayLength' :  500,
         'iDisplayStart' : 0,
         'iSortCol_0' : 0,
         'iSortingCols' : 1,

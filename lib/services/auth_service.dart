@@ -1,8 +1,7 @@
-
 import 'package:ball_on_a_budget_planner/configs/globals.dart';
 import 'package:ball_on_a_budget_planner/custom_models/UserResponse.dart';
 import 'package:ball_on_a_budget_planner/custom_models/user.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 //import 'package:google_sign_in/google_sign_in.dart';
@@ -12,11 +11,10 @@ import 'package:ball_on_a_budget_planner/services/base_service.dart';
 import 'package:http/http.dart' as http;
 
 import 'dart:async';
-
 import 'dart:convert';
 
-
 class AuthService extends BaseAuthService {
+
   //final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   //final GoogleSignIn googleSignIn = GoogleSignIn();
   //final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -34,6 +32,15 @@ class AuthService extends BaseAuthService {
 
   @override
   Future<User> getCurrentUser() async{
+
+    String userId = await _storage.read(key: 'userId');
+    //String role = await _storage.read(key: 'role') as String;
+    String name = await _storage.read(key: 'name');
+    String email = await _storage.read(key: 'email');
+
+
+    User user  = new User(id:userId, email: email, username: name);
+    return user;
    // return firebaseAuth.currentUser;
   }
 
@@ -127,7 +134,7 @@ class AuthService extends BaseAuthService {
   }
 
   @override
-  Future<bool> signOutUser()async {
+  Future<bool> signOutUser() async {
     try {
       Future.wait([
        // firebaseAuth.signOut(),
@@ -135,9 +142,17 @@ class AuthService extends BaseAuthService {
         this.logOut()
       ]);
 
+      print('déconnexion');
+
+      final userId = await _storage.read(key: 'userId');
+      print(userId);
+
       return true;
+
     } catch (e) {
+      print(' Echec de déconnexion');
       return false;
+
     }
   }
 
@@ -182,6 +197,9 @@ class AuthService extends BaseAuthService {
         // store user id
         await this._saveUserId(json['Id'] as String);
         await this._saveUserRole(json['Role'] as String);
+        await this._saveUserName(json['Name'] as String);
+        await this._saveUserEmail(json['Email'] as String);
+
 
       }
       else {
@@ -198,7 +216,6 @@ class AuthService extends BaseAuthService {
     return   resp ;
 
   }
-
 
   // SignIn using Firebase
   /*@override
@@ -263,6 +280,9 @@ class AuthService extends BaseAuthService {
 
     // Write value 
     await _storage.write(key: 'userId', value: userId);
+
+    print('save user Id : '  + userId);
+
     return;
 
   }
@@ -275,10 +295,28 @@ class AuthService extends BaseAuthService {
 
   }
 
+  Future _saveUserName( String name ) async {
+
+    // Write value
+    await _storage.write(key: 'name', value: name);
+    return;
+
+  }
+
+  Future _saveUserEmail( String email ) async {
+
+    // Write value
+    await _storage.write(key: 'email', value: email);
+    return;
+
+  }
+
   Future logOut() async {
     // Delete value 
     await _storage.delete(key: 'userId');
     await _storage.delete(key: 'role');
+    await _storage.delete(key: 'name');
+    await _storage.delete(key: 'email');
 
   }
 
@@ -289,13 +327,10 @@ class AuthService extends BaseAuthService {
     return userId;
   }
 
-
   static Future<String> getRole() async {
     final _storage = new FlutterSecureStorage();
     final role = await _storage.read(key: 'role');
     return role;
   }
-
-
 
 }

@@ -25,11 +25,11 @@ void main() async {
     supportedLocales: [
       Locale('fr', 'FR'),
       Locale('en', 'US'),
-     // Locale('es', 'MX'),
+
       
     ],
     fallbackLocale: Locale('fr', 'FR'),
-   // fallbackLocale: Locale('en', 'US'),
+
     path:'assets/translations' ,
     child: MyApp(),
   )

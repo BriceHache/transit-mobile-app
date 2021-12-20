@@ -1,5 +1,8 @@
 import 'package:ball_on_a_budget_planner/dossiers/dossiers_list.dart';
+import 'package:ball_on_a_budget_planner/dossiers/frais_dossiers_list.dart';
+import 'package:ball_on_a_budget_planner/dossiers/pieces_jointes_dossiers_list.dart';
 import 'package:ball_on_a_budget_planner/helpers/utils.dart';
+import 'package:ball_on_a_budget_planner/models/get_dossier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +11,6 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-//me
 import 'package:ball_on_a_budget_planner/pages/budgets/add_budget_page.dart';
 import 'package:ball_on_a_budget_planner/pages/budgets/add_budget_temp.dart';
 import 'package:ball_on_a_budget_planner/pages/budgets/budgtes_page.dart';
@@ -117,34 +119,35 @@ class _HomePageState extends State<HomePage> {
            
             marginBottom: 50,
             children: [
-              SpeedDialChild(
+             /* SpeedDialChild(
                 backgroundColor: Theme.of(context).accentColor,
                 child: Icon(BanklinIcons.plus),
-                //label: 'add_expense'.tr(), labelBackgroundColor: Colors.white,
                 label: 'add_reglement'.tr(), labelBackgroundColor: Colors.white,
                 onTap: (){
                   
                   nextScreen(context, AddExpensePage());
                   
                   } 
-              ),
+              ),*/
               SpeedDialChild(
                  backgroundColor: Theme.of(context).accentColor,
                 child: Icon(BanklinIcons.wallet),
-                //label: 'add_incomes'.tr(), labelBackgroundColor: Colors.white,
-                label: 'add_dossier'.tr(), labelBackgroundColor: Colors.white,
+
+                //label: 'add_dossier'.tr(), labelBackgroundColor: Colors.white,
+                label: 'add_piece_jointe'.tr(), labelBackgroundColor: Colors.white,
                 onTap: () {
-                  
-                  nextScreen(context, AddIncomePage());
+                 // nextScreen(context, AddIncomePage());
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => PieceJointeDossiersPage(dossier: new GetDossier(id: 0, numero_dossier: 'non défini'), showDossiers: true)));
               } ),
               SpeedDialChild(
                  backgroundColor: Theme.of(context).accentColor,
                 child: Icon(BanklinIcons.plus),
-               // label: 'categories'.tr(), labelBackgroundColor: Colors.white,
+
                 label: 'add_dossier_depense'.tr(), labelBackgroundColor: Colors.white,
                 onTap: () {
                    
-                  nextScreen(context, AddCategory());
+                  //nextScreen(context, AddCategory());
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => FraisDossiersPage(dossier: new GetDossier(id: 0, numero_dossier: 'non défini'), showDossiers: true)));
                   } 
               ),
               /*SpeedDialChild(
@@ -181,11 +184,11 @@ class _HomePageState extends State<HomePage> {
               DashboardPage(),
               DossiersPage(_startDate, _endDate),
               // ExpensesPage(),
-              IncomesPage(),
-              CategoryList(),
+              //IncomesPage(),
+              // CategoryList(),
               // BudgetsPage(),
               ProfilePage(),
-              SettingsPage(),
+             // SettingsPage(),
               LanguageSettingsPage()
             ],
           ),
@@ -225,9 +228,7 @@ class _HomePageState extends State<HomePage> {
                   child: InkWell(
                     splashColor: Colors.white.withOpacity(0.5),
                     onTap: () {
-                     
                       _scaffoldKey.currentState.openDrawer();
-                      
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -252,7 +253,8 @@ class _HomePageState extends State<HomePage> {
                   style: customStyle(Colors.white, 20.0, FontWeight.w700,)
                 ),
               ),
-              _selectedPage == 10
+             // _selectedPage == 10
+              _selectedPage == 2
               ? ClipRRect(
                 borderRadius: BorderRadius.circular(50.0),
                 child: Material(
@@ -347,7 +349,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.pop(context);
                     },
                     child: Text(
-                      'No',
+                      'Non',
                       style: customStyleLetterSpace(Colors.black87, 13.5, FontWeight.w600, 0.3)
                     ),
                   ),
@@ -362,7 +364,7 @@ class _HomePageState extends State<HomePage> {
                       isSigningOut = true;
                     },
                     child: Text(
-                      'Yes',
+                      'Oui',
                       style: customStyleLetterSpace(Colors.red.shade700, 13.5, FontWeight.w600, 0.3)
                     ),
                   ),
@@ -436,7 +438,7 @@ class _HomePageState extends State<HomePage> {
                   1
 
                 ),
-                builLlistTile(
+             /*   builLlistTile(
                   () {
                     setState(() {
                       _selectedPage = 2;
@@ -475,7 +477,7 @@ class _HomePageState extends State<HomePage> {
                   'clients'.tr(),
                   3
 
-                ),
+                ),*/
                /* builLlistTile(
                   () {
                     setState(() {
@@ -508,22 +510,28 @@ class _HomePageState extends State<HomePage> {
                 builLlistTile(
                   () {
                     setState(() {
-                      _selectedPage = 10;
+                     // _selectedPage = 10;
+                      _selectedPage = 2;
                       Navigator.pop(context);
-                      _pageController.jumpToPage(5);
-                      _title = 'my_profile'.tr();
+                      _pageController.jumpToPage(2);
+                     // _pageController.jumpToPage(10);
+                     // _title = 'my_profile'.tr();
+                      _title = 'logout'.tr();
                     });
                   },
                   BanklinIcons.settings,
                   30.0,
-                  _selectedPage == 10
+                 // _selectedPage == 10
+                  _selectedPage == 2
                   ? Theme.of(context).primaryColor
                   : Colors.white,
-                  'my_profile'.tr(),
-                  10
+                 // 'my_profile'.tr(),
+                  'logout'.tr(),
+                  2
+                  //10
 
                 ),
-                builLlistTile(
+              /*  builLlistTile(
                   () {
                     setState(() {
                       _selectedPage = 6;
@@ -540,24 +548,24 @@ class _HomePageState extends State<HomePage> {
                   'settings'.tr(),
                   6
 
-                ),
+                ),*/
 
                 builLlistTile(
                   () {
                     setState(() {
-                      _selectedPage = 7;
+                      _selectedPage = 3;
                       Navigator.pop(context);
-                      _pageController.jumpToPage(7);
+                      _pageController.jumpToPage(3);
                       _title = 'lang_settin'.tr();
                     });
                   },
                   Icons.translate,
                   30.0,
-                  _selectedPage == 7
+                  _selectedPage == 3
                   ? Theme.of(context).primaryColor
                   : Colors.white,
                   'languages'.tr(),
-                  7
+                  3
 
                 ),
 

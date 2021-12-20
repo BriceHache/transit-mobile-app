@@ -5,7 +5,7 @@ import 'package:ball_on_a_budget_planner/models/get_client.dart';
 import 'package:ball_on_a_budget_planner/models/get_dossier.dart';
 import 'package:ball_on_a_budget_planner/models/get_reglement.dart';
 import 'package:ball_on_a_budget_planner/models/statistics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 
 
 abstract class BaseDossierService {
