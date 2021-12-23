@@ -1,29 +1,37 @@
-class RequestParamDataTable {
-    int iColumns;
-    int iDisplayLength;
-    int iDisplayStart;
-    int iSortCol_0;
-    int iSortingCols;
-    String sColumns ;
-    int sEcho;
-    String sSearch;
-    String sSortDir_0;
-    String start_date;
-    String end_date;
+import 'datatable.dart';
 
-    RequestParamDataTable({
-        this.iColumns,
-        this.iDisplayLength,
-        this.iDisplayStart,
-        this.iSortCol_0,
-        this.iSortingCols,
-        this.sColumns,
-        this.sEcho,
-        this.sSearch,
-        this.sSortDir_0,
-        this.start_date,
-        this.end_date,
-    });
+class ClientRequestParamDataTable extends RequestParamDataTable  {
+
+    int client_id;
+    ClientRequestParamDataTable({
+      int iColumns,
+      int iDisplayLength,
+      int iDisplayStart,
+      int iSortCol_0,
+      int iSortingCols,
+      String sColumns,
+      int sEcho,
+      String sSearch,
+      String sSortDir_0,
+      String start_date,
+      String end_date,
+      this.client_id
+    }) :
+
+      super(
+          iColumns : iColumns,
+          iDisplayLength : iDisplayLength,
+          iDisplayStart : iDisplayStart,
+          iSortCol_0 : iSortCol_0,
+          iSortingCols : iSortingCols,
+          sColumns : sColumns ,
+          sEcho : sEcho,
+          sSearch : sSearch,
+          sSortDir_0 : sSortDir_0,
+          start_date : start_date,
+          end_date : end_date
+        );
+
 
     Map<String, dynamic> toPostDossierObject() {
 
@@ -38,7 +46,8 @@ class RequestParamDataTable {
           'sSearch' : this.sSearch,
          'sSortDir_0' : 'asc',
          'start_date' : this.start_date,
-         'end_date' : this.end_date
+         'end_date' : this.end_date,
+          'client_id' : this.client_id
 
         };
     }
@@ -56,7 +65,8 @@ class RequestParamDataTable {
         'sSearch' : this.sSearch,
         'sSortDir_0' : 'asc',
         'start_date' : this.start_date,
-        'end_date' : this.end_date
+        'end_date' : this.end_date,
+        'client_id' : this.client_id
 
       };
     }
@@ -74,25 +84,10 @@ class RequestParamDataTable {
         'sSearch' : this.sSearch,
         'sSortDir_0' : 'asc',
         'start_date' : this.start_date,
-        'end_date' : this.end_date
-
+        'end_date' : this.end_date,
+        'client_id' : this.client_id
       };
     }
 
-    RequestParamDataTable.fromMap(Map<String, dynamic> map)
-      : assert(map['iColumns'] != null),
-        assert(map['iDisplayLength'] != null),
-        assert(map['iDisplayStart'] != null),
-        assert(map['iSortCol_0'] != null),
-        assert(map['iSortingCols'] != null),
-        assert(map['sColumns'] != null),
-        assert(map['sEcho'] != null),
-        assert(map['sSearch'] != null),
-        assert(map['sSortDir_0'] != null),
-        assert(map['start_date'] != null),
-        assert(map['end_date'] != null)
-        ;
-    //@override
-   // String toString() => "Record: $name";
 
 }

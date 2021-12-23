@@ -12,10 +12,11 @@ import 'package:ball_on_a_budget_planner/resources/api_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class DossiersPage extends StatefulWidget {
+class DossiersOverviewPage extends StatefulWidget {
 
 
   //Static references to our parent widget variables
@@ -23,12 +24,12 @@ class DossiersPage extends StatefulWidget {
   final DateTime To_date;
 
 
-  DossiersPage(DateTime from,DateTime to):
+  DossiersOverviewPage(DateTime from,DateTime to):
         this.From_date = from,
         this.To_date = to
   ;
   @override
-  _DossiersState createState() => _DossiersState();
+  _DossiersoverviewState createState() => _DossiersoverviewState();
 }
 
 
@@ -50,7 +51,7 @@ class Debouncer {
 }
 
 
-class _DossiersState extends State<DossiersPage> {
+class _DossiersoverviewState extends State<DossiersOverviewPage> {
 
   bool _isUpdating;
   String _titleProgress;
@@ -73,7 +74,6 @@ class _DossiersState extends State<DossiersPage> {
   List<Tuple2<String,Tuple2<DateTime, DateTime>>> rangeDates;
 
   Tuple2<String,Tuple2<DateTime, DateTime>> selectedValue;
-
 
   @override
   void initState() {
@@ -222,6 +222,18 @@ class _DossiersState extends State<DossiersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: Text('dossiers'.tr(),
+              style:  customStyleLetterSpace(Colors.white, 18, FontWeight.w700, 0.33)),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(FontAwesomeIcons.times, color: Theme.of(context).accentColor,),
+              onPressed: (){Navigator.of(context).pop();},
+            )],
+        ),
         body:
               SingleChildScrollView(
                 scrollDirection: Axis.vertical,

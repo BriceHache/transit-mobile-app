@@ -191,6 +191,7 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
                   children: [
 
                     NiceText(
+                        (dossier.numero_repertoire == null && dossier.numero_repertoire != "")  ? "RAS" :
                         dossier.numero_repertoire,
                         'N° DE REPERTOIRE : ',
                         Colors.green, type: "date")

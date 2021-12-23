@@ -10,7 +10,8 @@
     <application
         android:label="CTI"
         android:usesCleartextTraffic="true"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:requestLegacyExternalStorage="true">
 
         <activity
             android:name=".MainActivity"

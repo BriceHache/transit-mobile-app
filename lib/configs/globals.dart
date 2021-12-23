@@ -4,6 +4,6 @@ class Globals {
   static User user;
   static String serverRelativeUrl = "http://www.app.cti-gabon.com/";
   static String targethost = "www.app.cti-gabon.com";
-  //static String targethost = "41.159.72.100";
+  //static String targethost = "192.168.1.85:8086";
 
 }

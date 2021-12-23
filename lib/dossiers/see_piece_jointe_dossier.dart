@@ -6,12 +6,14 @@ import 'dart:io';
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
 import 'package:ball_on_a_budget_planner/dossiers/pieces_jointes_dossiers_list.dart';
 import 'package:ball_on_a_budget_planner/helpers/dialog.dart';
+import 'package:ball_on_a_budget_planner/helpers/show_alert.dart';
 import 'package:ball_on_a_budget_planner/helpers/styles_custom.dart';
 import 'package:ball_on_a_budget_planner/helpers/utils.dart';
 import 'package:ball_on_a_budget_planner/models/budget.dart';
 import 'package:ball_on_a_budget_planner/models/get_dossier.dart';
 import 'package:ball_on_a_budget_planner/models/get_pieces_jointes_dossier.dart';
 import 'package:ball_on_a_budget_planner/models/income.dart';
+import 'package:ball_on_a_budget_planner/resources/api_provider.dart';
 import 'package:ball_on_a_budget_planner/widgets/budget_temp_card.dart';
 import 'package:ball_on_a_budget_planner/widgets/budgets_card.dart';
 import 'package:ball_on_a_budget_planner/widgets/button_widget.dart';
@@ -25,6 +27,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tuple/tuple.dart';
 //import 'package:universal_html/html.dart';
 
 class SeePieceJointePage extends StatefulWidget {
@@ -50,37 +53,76 @@ class _SeePieceJointeDossierPageState extends State<SeePieceJointePage> {
   File currentFile;
 
   PieceJointeDossier pieceJointe = new PieceJointeDossier();
- 
+  PieceJointeDossier downloadPJ;
+
    @override
   void initState() {
     super.initState();
     loadDocument();
-
   }
 
   loadDocument() async {
 
-    String fileName = pieceJointe.file_name;
-    var bytes = base64Decode(pieceJointe.file_base6.replaceAll('\n', ''));
-    final output = await getTemporaryDirectory();
-    final file = File("${output.path}/$fileName.pdf");
-    await file.writeAsBytes(bytes.buffer.asUint8List());
-    currentFile = file;
+    Future<Tuple2<List<PieceJointeDossier>, String>> dossiersGlobalResponse =  ApiProvider.GetDocument(pieceJointe.id);
+    dossiersGlobalResponse.then((_realResponse) async {
 
-    document = await PDFDocument.fromFile(file);
-    setState(
-            () => _isLoading = false
-    );
+        List<PieceJointeDossier>  _currentdoc = _realResponse.item1;
+
+        if(_realResponse.item2 == "Success"){
+
+          final fDoc = _currentdoc.first;
+          downloadPJ = fDoc;
+          String fileName = pieceJointe.file_name;
+          var bytes = base64Decode(fDoc.file_base6.replaceAll('\n', ''));
+          final output = await getTemporaryDirectory();
+          final file = File("${output.path}/$fileName.pdf");
+          await file.writeAsBytes(bytes.buffer.asUint8List());
+          currentFile = file;
+
+          document = await PDFDocument.fromFile(file);
+          setState(
+                  () => _isLoading = false
+          );
+
+        }else if(_realResponse.item2 == "Error"){
+
+          setState(
+                  () => _isLoading = false
+          );
+
+          showAlert(context, "Echec du chargement.","Temps d'attente dépassé.");
+
+        }else {
+          setState(
+                  () => _isLoading = false
+          );
+          showAlert(context, "Problème de connexion.","Vérifiez votre connexion internet.");
+
+        }
+
+    });
 
   }
   downloadDocument() async {
 
-    String fileName = pieceJointe.file_name;
-    var bytes = base64Decode(pieceJointe.file_base6.replaceAll('\n', ''));
-    final output = await getDownloadsDirectory();
+    String fileName = downloadPJ.file_name;
+    var bytes = base64Decode(downloadPJ.file_base6.replaceAll('\n', ''));
+    //final output = await getDownloadsDirectory();
     //final output = await getApplicationDocumentsDirectory();
-    final file = File("${output.path}/$fileName.pdf");
-    await file.writeAsBytes(bytes);
+    //final file = File("${output.path}/$fileName.pdf");
+
+    //Directory root = await getTemporaryDirectory();
+   // String directoryPath = root.path + '/Documents/CTI/Documents_Dossier_Numero_'+downloadPJ.dossier_id.toString()+ "/"+fileName;
+    String directoryPath = '/storage/emulated/0/Download/' + 'CTI/Documents_Dossier_Numero_'+downloadPJ.dossier_id.toString()+ "/"+fileName;
+    final file =  new File(directoryPath).create(recursive: true)
+    .then((File file) async {
+        await file.writeAsBytes(bytes);
+    });
+
+     //await file.writeAsBytes(bytes);
+    print('path :' + directoryPath );
+
+    showAlert(context, pieceJointe.nom_abrege, "Document téléchargé avec succès.");
 
   }
 
@@ -161,4 +203,10 @@ class _SeePieceJointeDossierPageState extends State<SeePieceJointePage> {
   }
 
 
+ /* void createFileRecursively(String filename) {
+    // Create a new directory, recursively creating non-existent directories.
+    new Directory.fromPath(new Path(filename).directoryPath)
+        .createSync(recursive: true);
+    new File(filename).createSync();
+  }*/
 }

@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'package:ball_on_a_budget_planner/bloc/statistics_bloc/statistics_bloc.dart';
 import 'package:ball_on_a_budget_planner/dossiers/dossiers_list.dart';
+import 'package:ball_on_a_budget_planner/dossiers/dossiers_overview_list.dart';
 import 'package:ball_on_a_budget_planner/helpers/common_range_date.dart';
 import 'package:ball_on_a_budget_planner/helpers/helpers.dart';
 import 'package:ball_on_a_budget_planner/models/drop_list_model.dart';
@@ -333,82 +334,91 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildStatistics() {
-    return Container(
+    return
 
-      child: BlocProvider(
-        create: (_) => _statisticsBloc,
+      ConstrainedBox(
+        constraints: BoxConstraints.expand(
+          width: MediaQuery.of(context).size.width,
+            height : MediaQuery.of(context).size.height
+        ),
 
-        child: BlocListener<StatisticsBloc, StatisticsState>(
-          listener: (context, state) {
-            if (state is StatisticsError) {
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                ),
-              );
-            }
-          },
-          child: BlocBuilder<StatisticsBloc, StatisticsState>(
+        child: Container(
 
-            builder: (context, state) {
-              if (state is StatisticsInitial) {
-                return _buildLoading();
-              } else if (state is StatisticsLoading) {
+        child: BlocProvider(
+          create: (_) => _statisticsBloc,
 
-                return _buildLoading();
-
-              } else if (state is StatisticsLoaded) {
-
-                return _buildCard(context, state.statistics);
-
-              } else if (state is StatisticsError) {
-
-
-                return Container(
-                  margin: EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(height: 10,),
-                      Text( state.message ,
-                          style: customStyleLetterSpace(Colors.white, 20, FontWeight.w800,0.338)),
-                      SizedBox(height: 20,),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                             Image.asset('assets/images/no_data2.png',height: 200)
-                        ],
-                      )
-
-                    ],
+          child: BlocListener<StatisticsBloc, StatisticsState>(
+            listener: (context, state) {
+              if (state is StatisticsError) {
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
                   ),
                 );
-               // return Container();
-              }else{
-                  return Container(
-                      margin: EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                            SizedBox(height: 10,),
-                            Text( "Pas de connexion internet." ,
-                            style: customStyleLetterSpace(Colors.white, 14, FontWeight.w800,0.338)),
-                            SizedBox(height: 20,),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                  Image.asset('assets/images/no_data.png',height: 200)
-                              ],
-                            )
-                        ],
-                      ),
-                  );
               }
             },
+            child: BlocBuilder<StatisticsBloc, StatisticsState>(
+
+              builder: (context, state) {
+                if (state is StatisticsInitial) {
+                  return _buildLoading();
+                } else if (state is StatisticsLoading) {
+
+                  return _buildLoading();
+
+                } else if (state is StatisticsLoaded) {
+
+                  return _buildCard(context, state.statistics);
+
+                } else if (state is StatisticsError) {
+
+
+                  return Container(
+                    margin: EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox(height: 10,),
+                        Text( state.message ,
+                            style: customStyleLetterSpace(Colors.white, 20, FontWeight.w800,0.338)),
+                        SizedBox(height: 20,),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                               Image.asset('assets/images/no_data2.png',height: 200)
+                          ],
+                        )
+
+                      ],
+                    ),
+                  );
+                 // return Container();
+                }else{
+                    return Container(
+                        margin: EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                              SizedBox(height: 10,),
+                              Text( "Pas de connexion internet." ,
+                              style: customStyleLetterSpace(Colors.white, 14, FontWeight.w800,0.338)),
+                              SizedBox(height: 20,),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                    Image.asset('assets/images/no_data.png',height: 200)
+                                ],
+                              )
+                          ],
+                        ),
+                    );
+                }
+              },
+            ),
           ),
         ),
-      ),
-    );
+    ),
+      );
   }
 
   SelectDropList _showPrefinedRangeDates(){
@@ -481,9 +491,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: <Widget>[
                         TextButton(
                           onPressed: (){
-
                              //nextScreen(context,  HomePage(from: _startDate, to: _endDate, selectedPage: 1, title: 'dossiers'.tr()));
-                             nextScreen(context,  DossiersPage(_startDate, _endDate));
+                             //nextScreen(context,  DossiersPage(_startDate, _endDate));
+                             Navigator.push(context, MaterialPageRoute(builder: (context) => DossiersOverviewPage(_startDate, _endDate)));
                           //  Navigator.pushReplacement(context, navegateFadein(context,  HomePage(from: _startDate, to: _endDate, selectedPage: 1, title: 'dossiers'.tr())));
 
                           },
@@ -494,7 +504,6 @@ class _DashboardPageState extends State<DashboardPage> {
                               _overviewExpenses(
                                   "${model.total_dossiers}", 'dossiers_s'.tr(),
                                   Colors.blue)
-
                             ],
 
                           ),

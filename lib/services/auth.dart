@@ -66,8 +66,8 @@ class AuthASP  {
     try {
 
         var gettokenuri = new Uri(scheme: 'http',
-            //host: '10.0.2.2',
-            //port: 52175,
+           // host: '192.168.1.85',
+            //port: 8086,
             host: targethost,
             path: '/Token');
 

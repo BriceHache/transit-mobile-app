@@ -2,10 +2,12 @@ import 'dart:async';
 import 'package:ball_on_a_budget_planner/dossiers/see_dossier.dart';
 import 'package:ball_on_a_budget_planner/dossiers/see_piece_jointe_dossier.dart';
 import 'package:ball_on_a_budget_planner/helpers/dialog.dart';
+import 'package:ball_on_a_budget_planner/helpers/show_alert.dart';
 import 'package:ball_on_a_budget_planner/helpers/styles_custom.dart';
 import 'package:ball_on_a_budget_planner/models/get_documents_non_rattaches_dossier.dart';
 import 'package:ball_on_a_budget_planner/models/get_pieces_jointes_dossier.dart';
 import 'package:ball_on_a_budget_planner/models/key_value.dart';
+import 'package:ball_on_a_budget_planner/models/save_documents_model.dart';
 import 'package:ball_on_a_budget_planner/widgets/button_widget.dart';
 import 'package:ball_on_a_budget_planner/widgets/labels.dart';
 import 'package:ball_on_a_budget_planner/widgets/large_button.dart';
@@ -17,6 +19,7 @@ import 'package:ball_on_a_budget_planner/resources/api_provider.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:searchable_dropdown/searchable_dropdown.dart';
@@ -64,7 +67,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
 
   GetDossier dossier = new GetDossier();
 
-  PieceJointeDossier pieceJointe = new PieceJointeDossier();
+  SaveDocumentsModel docsModel = new SaveDocumentsModel();
 
   List<PieceJointeDossier> _piecesJointesDossiers;
 
@@ -101,12 +104,17 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
   FileType _pickingType = FileType.custom;
   TextEditingController _controller = TextEditingController();
 
+  String userid;
+  final storage = new FlutterSecureStorage();
+
   @override
   void initState() {
 
     super.initState();
+    setUserid();
 
-    pieceJointe.dossier_id = dossier.id;
+
+    docsModel.dossier_id = dossier.id;
 
     _piecesJointesDossiers = [];
     _documentsDossiers = [];
@@ -118,8 +126,6 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
     response_status = "ongoing";
     response_status_docs = "ongoing";
     selectDocMessage = "aucun".tr();
-   // Color addDocColor = ;
-   // selectedDocument = null;
 
     _ensDossiers = [];
     _filterDossiers = [];
@@ -134,6 +140,17 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
     _getEnsDossiers();
 
 
+  }
+
+  void setUserid()async{
+    userid = await storage.read(key: 'userId');
+    if(userid != null){
+      docsModel.current_user_id = int.parse(userid);
+    }
+    print(userid);
+    setState(() {
+
+    });
   }
 
   // Method to update title in the AppBar Title
@@ -172,6 +189,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
           response_status = "connexion_failed";
         }
         _isloading = false;
+        _isUpdating = false;
 
       });
 
@@ -301,6 +319,12 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                             )
                         ),
 
+                          Container(
+
+                          child:
+                          _isUpdating ? _buildLoading() : null
+                          ),
+
                         (_isCreating && _showDossiers)
                         ? Container(
                             margin: EdgeInsets.all(10.0),
@@ -324,7 +348,18 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                                 setState(() {
                                     if(selected != null){
                                         selectedDossier = selected.Text;
-                                        pieceJointe.dossier_id = int.parse(selected.Value);
+                                        docsModel.dossier_id = int.parse(selected.Value);
+
+                                        widget.dossier.id = int.parse(selected.Value);
+
+                                        List<String> names = selected.Text.toString().split('-');
+
+                                        widget.dossier.numero_dossier = names.first;
+
+                                        _isloading = true;
+
+                                        _getPiecesJointes();
+
                                     }else{
                                         selectedDossier = 'select_dossier'.tr();
                                     }
@@ -361,6 +396,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                         _isCreating
                             ? Container(
                           //padding: EdgeInsets.only(left: 20, right: 20, top: 5,),
+                            margin: EdgeInsets.all(10.0),
                             child: Column(
                                 children: [
                                   SearchableDropdown.single(
@@ -374,12 +410,15 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                                     }).toList(),
                                     //  _filterDossiers,
                                     value: selectedDocument,
+                                    menuBackgroundColor: Colors.white,
+                                    style: customStyle(Colors.white, 16, FontWeight.normal),
                                     hint: Text('select_doc_type'.tr(),style: customStyle(Colors.white, 16, FontWeight.normal)),
                                     searchHint: 'select_doc_type'.tr(),
                                     onChanged: (selected) {
                                       setState(() {
                                         if(selected != null){
                                           selectedDocument = selected.nom_abrege;
+                                          docsModel.document_id = selected.id;
                                         }else{
                                           selectedDocument = 'select_doc_type'.tr();
                                         }
@@ -415,9 +454,10 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                             )
                         )
                             : Container(),
-                        SizedBox(height: 20),
+                        //SizedBox(height: 20),
                          _isCreating
                             ? Container(
+                             margin: EdgeInsets.all(10.0),
                           //padding: EdgeInsets.only(left: 20, right: 20, top: 5,),
                           child: Column(
                           children: [
@@ -441,7 +481,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                             },
                               onChanged: (String value ) => setState(() {
 
-                                pieceJointe.numero_document = value;
+                                docsModel.numero_document = value;
                               }),
                               style: customStyle(Colors.white, 16, FontWeight.normal),
                             )
@@ -449,9 +489,10 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                           )
                         )
                             : Container(),
-                        SizedBox(height: 10),
+                       // SizedBox(height: 10),
                          _isCreating ?
                         Container(
+                          margin: EdgeInsets.all(10.0),
                           //padding: const EdgeInsets.only(top: 50.0, bottom: 20.0),
                           child: Column(
                             children: <Widget>[
@@ -475,11 +516,13 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                         )
                             : Container(),
 
-                        _viewFile(),
-
+                        _isCreating ?
+                        _viewFile()
+                       : Container()
+                        ,
                            (response_status != "connexion_failed") ?
                               Container(
-                                margin: EdgeInsets.all(0.0),
+                                margin: EdgeInsets.all(10.0),
                                 child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
@@ -541,174 +584,184 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
           child:
           Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.blue),
-            child: DataTable(
-              dividerThickness: 5.0,
-              columnSpacing : 0,
-              decoration :  BoxDecoration(
-                    border:
-                    Border.all(
-                    width: 1,
-                      color: Colors.blue,
-
-                    )
+            child: ConstrainedBox(
+              constraints: BoxConstraints.expand(
+                  width: MediaQuery.of(context).size.width,
+                  height: (_filterPiecesJointesDossiers.length  == 0 ? 100.0 : 65 + 44.0 * _filterPiecesJointesDossiers.length)
               ),
 
-              columns: [
-                DataColumn(
-                  label: Container(
-                  padding: EdgeInsets.all(0.0),
-                  width: 60,
+              child: DataTable(
+                dividerThickness: 5.0,
+                columnSpacing : 0,
+                decoration :  BoxDecoration(
+                      border:
+                      Border.all(
+                      width: 1,
+                        color: Colors.blue,
 
-                      child: Text(
-                        'N°',
-                        style: TextStyle(color: Colors.blue),
-                        textAlign: TextAlign.left,
-                      ),
-
-                  )
-
-                ),
-                DataColumn(label: _verticalDivider),
-
-                DataColumn(
-                  label: Container(
-                    padding: EdgeInsets.all(0.0),
-                    width: 130,
-                    child: Center(
-                      child: Text(
-                        'Document',
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ),
-                  )
-                ),
-                DataColumn(label: _verticalDivider),
-                // Lets add one more column to show a see button and update button
-                DataColumn(
-                  label: Container(
-                    padding: EdgeInsets.all(0.0),
-                    width: 30,
-                    child: Center(
-                      child: Text(
-                        'Actions',
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ),
-                  )
-                )
-              ],
-              // the list should show the filtered list now
-              rows: _filterPiecesJointesDossiers.length > 0 ? _filterPiecesJointesDossiers
-                  .map(
-                    (piecejointedossier) => DataRow(cells: [
-
-                  DataCell(
-                    Container(
-                      width: 60,
-                      padding: EdgeInsets.all(0.0),
-                      child: Text(piecejointedossier.numero_document,
-                         // textAlign: TextAlign.left,
-                        style: TextStyle(
-                        color: Colors.white,
-                          fontSize: 10.0
-                      ),
-                      ),
-                      //alignment: Alignment.centerLeft
-                    ),
-                    onTap: () {
-                      _seePieceJointe(piecejointedossier);
-                      // Set the Selected employee to Update
-                      _selectedPieceJointeDossier = piecejointedossier;
-                      // Set flag updating to true to indicate in Update Mode
-                      setState(() {
-                        _isUpdating = true;
-                      });
-                    },
-                  ),
-                  DataCell(_verticalDivider),
-                  DataCell(
-
-                    Container(
-                      width: 130,
-                      padding: EdgeInsets.all(0.0),
-                      child: Text(
-                        piecejointedossier.nom_abrege,
-                          style: TextStyle(
-                            color: Colors.white,
-                              fontSize: 10.0
-                          ),
-                        maxLines: 3,
-                      ),
-                    ),
-                    onTap: () {
-
-                      _seePieceJointe(piecejointedossier);
-                      // Set the Selected employee to Update
-                      _selectedPieceJointeDossier = piecejointedossier;
-                      // Set flag updating to true to indicate in Update Mode
-                      setState(() {
-                        _isUpdating = true;
-                      });
-                    },
-                  ),
-                  DataCell(_verticalDivider),
-                  DataCell(
-                      Container(
-                        width: 30,
-                        padding: EdgeInsets.all(0.0),
-                        //child: Expanded(
-                        alignment : Alignment.center,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                             
-                              Expanded(
-                                child: IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red,),
-                                  iconSize: 18.0,
-                                  alignment: Alignment.center,
-                                  padding: EdgeInsets.all(1.0),
-                                  onPressed: () {
-                                     _DeletePieceJointe(piecejointedossier);
-                                  },
-
-                                ),
-                              )
-
-                            ],
-                          ),
-                        //),
                       )
+                ),
+
+                columns: [
+                  DataColumn(
+                    label: Container(
+                    padding: EdgeInsets.all(0.0),
+                   // width: 60,
+
+                        child: Text(
+                          'N°',
+                          style: TextStyle(color: Colors.blue),
+                          textAlign: TextAlign.left,
+                        ),
+
                     )
-                ]),
-              )
-                  .toList() :
-                  [
-                   DataRow(cells: [
-                     DataCell(
 
-                      SizedBox.shrink()
+                  ),
+                  DataColumn(label: _verticalDivider),
 
-                     ),
-                     DataCell(SizedBox.shrink()),
-                     DataCell(
-                       Container(
-                         width: 130,
-                         padding: EdgeInsets.all(0.0),
-                         child: Text("Aucun document.",
-                           textAlign: TextAlign.center,
-                           style: TextStyle(
-                               color: Colors.white,
-                               fontSize: 10.0
+                  DataColumn(
+                    label: Container(
+                      padding: EdgeInsets.all(0.0),
+                     // width: 130,
+                      child: Center(
+                        child: Text(
+                          'Document',
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    )
+                  ),
+                  DataColumn(label: _verticalDivider),
+                  // Lets add one more column to show a see button and update button
+                  DataColumn(
+                    label: Container(
+                      padding: EdgeInsets.all(0.0),
+                    //  width: 30,
+                      child: Center(
+                        child: Text(
+                          'Actions',
+                          style: TextStyle(color: Colors.blue)
+                        ),
+                      ),
+                    )
+                  )
+                ],
+                // the list should show the filtered list now
+                rows: _filterPiecesJointesDossiers.length > 0 ? _filterPiecesJointesDossiers
+                    .map(
+                      (piecejointedossier) => DataRow(cells: [
+
+                    DataCell(
+                      Container(
+                     //   width: 60,
+                        padding: EdgeInsets.all(0.0),
+                        child: Text(piecejointedossier.numero_document,
+                           // textAlign: TextAlign.left,
+                          style: TextStyle(
+                          color: Colors.white,
+                            fontSize: 10.0
+                        ),
+                        ),
+                        //alignment: Alignment.centerLeft
+                      ),
+                      onTap: () {
+                        _seePieceJointe(piecejointedossier);
+                        // Set the Selected employee to Update
+                        _selectedPieceJointeDossier = piecejointedossier;
+                        // Set flag updating to true to indicate in Update Mode
+                        setState(() {
+                          _isUpdating = true;
+                        });
+                      },
+                    ),
+                    DataCell(_verticalDivider),
+                    DataCell(
+
+                      Container(
+                    //    width: 130,
+                        padding: EdgeInsets.all(0.0),
+                        child: Text(
+                          piecejointedossier.nom_abrege,
+                            style: TextStyle(
+                              color: Colors.white,
+                                fontSize: 10.0
+                            ),
+                          maxLines: 3,
+                        ),
+                      ),
+                      onTap: () {
+
+                        _seePieceJointe(piecejointedossier);
+                        // Set the Selected employee to Update
+                        _selectedPieceJointeDossier = piecejointedossier;
+                        // Set flag updating to true to indicate in Update Mode
+                        setState(() {
+                          _isUpdating = true;
+                        });
+                      },
+                    ),
+                    DataCell(_verticalDivider),
+                    DataCell(
+                        Container(
+                    //      width: 30,
+
+                          padding: EdgeInsets.all(0.0),
+                          //child: Expanded(
+                          alignment : Alignment.center,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+
+                                Expanded(
+                                  child: IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red,),
+                                    iconSize: 18.0,
+                                    alignment: Alignment.center,
+                                    padding: EdgeInsets.all(1.0),
+                                    onPressed: () {
+                                       _DeletePieceJointe(piecejointedossier);
+                                    },
+
+                                  ),
+                                )
+
+                              ],
+                            ),
+                          //),
+                        )
+                      )
+                  ]),
+                )
+                    .toList() :
+                    [
+                     DataRow(cells: [
+                       DataCell(
+
+                        SizedBox.shrink()
+
+                       ),
+                       DataCell(SizedBox.shrink()),
+                       DataCell(
+                         Container(
+                        //   width: 130,
+                           width: MediaQuery.of(context).size.width,
+                             height: 50,
+                           padding: EdgeInsets.all(0.0),
+                           child: Text("Aucun document.",
+                             textAlign: TextAlign.center,
+                             style: TextStyle(
+                                 color: Colors.white,
+                                 fontSize: 10.0
+                             ),
                            ),
-                         ),
-                         alignment: Alignment.center
-                     ),
-                     ),
-                     DataCell(SizedBox.shrink()),
-                     DataCell(SizedBox.shrink()),
-                   ])
-                  ]
+                           alignment: Alignment.center
+                       ),
+                       ),
+                       DataCell(SizedBox.shrink()),
+                       DataCell(SizedBox.shrink()),
+                     ])
+                    ]
+              ),
             ),
           )
           // ,
@@ -808,7 +861,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
     setState(() {
       _isCreating = true;
     });
-    _resetState();
+   // _resetState();
   }
 
   void _seePieceJointe(PieceJointeDossier piece_jointe){
@@ -820,11 +873,8 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
       formkey.currentState.validate();
       if( _paths != null ){
 
-        print(pieceJointe.numero_document);
 
           _saveDocument();
-
-          _resetState();
 
       }else{
         openDialog(context, '', 'select_file'.tr());
@@ -841,16 +891,35 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
       multipartArray.add(MultipartFile.fromFileSync(_paths[i].path, filename:
       _paths[i].name));
       }
-
     print("multipartArrayContent :");
-
     print(multipartArray);
 
-      openDialog(context, '', 'document_saved'.tr());
+    docsModel.files = multipartArray;
+
+    setState(() {
+      _isUpdating = true;
+    });
+
+    //Future<Tuple2<String, String>>
+    var globalResponse =
+
+    ApiProvider.SaveDocuments(docsModel)
+    //;
+
+    //globalResponse
+        .then((_realResponse) {
 
       setState(() {
-      _isCreating = false;
+        _isUpdating = false;
+        _isCreating = false;
+        _isloading = true;
+        _getPiecesJointes();
       });
+
+      showAlert(context, "Enregistrement des documents",_realResponse.item1);
+
+    });
+
     }
 
   void _DeletePieceJointe(PieceJointeDossier piece_jointe) async {
@@ -888,16 +957,25 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
 
   void deleteDocument(PieceJointeDossier document){
 
-
-  }
-
+          int rUserId = int.parse(userid);
+          var globalResponse =  ApiProvider.DeleteDocument(document.id, rUserId)
+              .then((_realResponse) {
+            print('documents supprimés');
+            setState(() {
+              _isloading = true;
+              _isUpdating = false;
+              _isCreating = false;
+              _getPiecesJointes();
+            });
+            showAlert(context, "Suppression des documents",_realResponse.item1);
+          });
+    }
 
   void _cancelDocument() async {
     setState(() {
       _isCreating = false;
     });
   }
-
 
   Widget _buildLoading() =>Center(
 
@@ -1019,7 +1097,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
       return;
     }
     setState(() {
-      //_isLoading = true;
+      //_isCreating = false;
       _isLoading = false;
       _directoryPath = null;
       _fileName = null;

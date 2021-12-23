@@ -65,6 +65,18 @@ class DossierDataTableResponse {
        return null;
      }
 
+     List<PieceJointeDossier>  GetUniquePieceJointeDossier (Map<String, dynamic> json) {
+       List<PieceJointeDossier> data = List<PieceJointeDossier>.empty(
+           growable: true);
+       if (json['data'] != null) {
+           data.add(new PieceJointeDossier.fromJson(json['data']));
+           return data;
+       }else{
+         return null;
+       }
+     }
+
+
      List<DocumentDossier>  GetPDocumentsNonRattachesDossier (Map<String, dynamic> json){
 
        List<DocumentDossier> data =  List<DocumentDossier>.empty(growable: true)  ;

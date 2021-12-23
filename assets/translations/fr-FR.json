@@ -324,7 +324,9 @@
     "add_a_fee": "Ajouter des frais",
 
     "ask_delete_doc": "Voulez-vous vraiment supprimer ce document ?",
+    "ask_delete_fee": "Voulez-vous vraiment supprimer ces frais ?",
     "warnig_delete_doc": "Cette action supprimera définitivement votre document.",
+    "warnig_delete_fee": "Cette action supprimera définitivement ces frais.",
     "add_document_number": "Ajouter un N° de document",
     "document_saved": "Document enregistré avec succès",
     "select_file": "Vous devez selectionner un fichier (pdf)"
