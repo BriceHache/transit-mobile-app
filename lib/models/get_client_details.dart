@@ -64,4 +64,19 @@ class GetClientDetails {
         data['Solde'] = this.Solde;
         return data;
     }
+
+     String getIndex(int index) {
+       switch (index) {
+         case 0:
+           return date;
+         case 1:
+           return Description;
+         case 2:
+           return Debit;
+         case 3:
+           return Credit;
+
+       }
+       return '';
+     }
 }

@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'package:ball_on_a_budget_planner/dossiers/see_dossier.dart';
+import 'package:ball_on_a_budget_planner/clients/see_client_details.dart';
 import 'package:ball_on_a_budget_planner/helpers/common_range_date.dart';
 import 'package:ball_on_a_budget_planner/helpers/styles_custom.dart';
+import 'package:ball_on_a_budget_planner/models/get_client.dart';
 import 'package:ball_on_a_budget_planner/widgets/large_button.dart';
 import 'package:ball_on_a_budget_planner/widgets/nice_text.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -12,23 +13,24 @@ import 'package:ball_on_a_budget_planner/resources/api_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tuple/tuple.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class DossiersPage extends StatefulWidget {
+class ClientsOverviewPage extends StatefulWidget {
+
 
   //Static references to our parent widget variables
   final DateTime From_date;
   final DateTime To_date;
 
-  DossiersPage(DateTime from,DateTime to):
+
+  ClientsOverviewPage(DateTime from,DateTime to):
         this.From_date = from,
         this.To_date = to
   ;
-
   @override
-  _DossiersState createState() => _DossiersState();
-
+  _ClientsOverviewState createState() => _ClientsOverviewState();
 }
 
 
@@ -47,22 +49,21 @@ class Debouncer {
     // then we will start a new timer looking for the user to stop
     _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
-
 }
 
 
-class _DossiersState extends State<DossiersPage> {
+class _ClientsOverviewState extends State<ClientsOverviewPage> {
 
   bool _isUpdating;
   String _titleProgress;
   bool _isloading;
   String response_status ;
 
-  List<GetDossier> _dossiers;
-  // this list will hold the filtered dossiers
-  List<GetDossier> _filterDossiers;
+  List<GetClient> _clients;
+  // this list will hold the filtered clients
+  List<GetClient> _filterClients;
 
-  GetDossier _selectedDossier;
+  GetClient _selectedClient;
 
   //our variable to use for our dates input
   DateTime _startDate;
@@ -76,14 +77,13 @@ class _DossiersState extends State<DossiersPage> {
   Tuple2<String,Tuple2<DateTime, DateTime>> selectedValue;
 
 
-
   @override
   void initState() {
 
     super.initState();
 
-    _dossiers = [];
-    _filterDossiers = [];
+    _clients = [];
+    _filterClients = [];
     _isUpdating = false;
     _isloading = true;
     response_status = "ongoing";
@@ -92,7 +92,7 @@ class _DossiersState extends State<DossiersPage> {
     _endDate = widget.To_date;
     _searchValue = "";
 
-    _getDossiers();
+    _getClients();
 
     rangeDates = PredefinedRangeDatesWithKeys();
 
@@ -123,7 +123,7 @@ class _DossiersState extends State<DossiersPage> {
       });
     }
 
-    _getDossiers();
+    _getClients();
   }
 
   Future setDateRange(DateTime from, DateTime to) async {
@@ -131,25 +131,25 @@ class _DossiersState extends State<DossiersPage> {
       _startDate = from;
       _endDate = to;
       _isloading = true;
-      _getDossiers();
+      _getClients();
     });
   }
 
-  _getDossiers() {
-    _showProgress('Chargement des dossiers...');
-    RequestParamDataTable _dossierDataTable = new RequestParamDataTable(
+  _getClients() {
+    _showProgress('Chargement des clients...');
+    RequestParamDataTable _clientDataTable = new RequestParamDataTable(
       start_date :  DateFormat('dd/MM/yyyy').format(_startDate).toString(),
        end_date : DateFormat('dd/MM/yyyy').format(_endDate).toString(),
       sSearch: _searchValue
     );
 
-    Future<Tuple2<List<GetDossier>, String>> dossiersGlobalResponse =  ApiProvider.GetAllDossiers(_dossierDataTable);
-    dossiersGlobalResponse.then((_realResponse) {
+    Future<Tuple2<List<GetClient>, String>> clientsGlobalResponse =  ApiProvider.GetAllClients(_clientDataTable);
+    clientsGlobalResponse.then((_realResponse) {
       setState(() {
-        _dossiers = _realResponse.item1;
+        _clients = _realResponse.item1;
 
         // Initialize to the list from Server when reloading...
-        _filterDossiers = _realResponse.item1;
+        _filterClients = _realResponse.item1;
 
         //
         if(_realResponse.item2 == "Success"){
@@ -184,7 +184,7 @@ class _DossiersState extends State<DossiersPage> {
                         decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(5.0),
 
-                            hintText: 'Recherche',
+                            hintText: 'Filtrer (nom du client)',
                             fillColor: Colors.white,
                             hintStyle: TextStyle(color: Colors.grey)
 
@@ -196,13 +196,11 @@ class _DossiersState extends State<DossiersPage> {
                           // Filter the original List and update the Filter list
                           setState(() {
                             _isloading = true;
-                            _filterDossiers = _dossiers
-                                .where((u) => (
-                                  u.numero_dossier.toLowerCase().contains(string.toLowerCase()) ||
-                                  u.ClientName.toLowerCase().contains(string.toLowerCase()) ||
-                                  u.numeroBLS.toLowerCase().contains(string.toLowerCase()) ||
-                                  u.ensemble_numeros_containers.toLowerCase().contains(string.toLowerCase())
-                                ))
+                            _filterClients = _clients
+                                .where((u) => (u.tiDescription
+                                .toLowerCase()
+                                .contains(string.toLowerCase()) ||
+                                u.tiCode.toLowerCase().contains(string.toLowerCase())))
                                 .toList();
 
                             _isloading = false;
@@ -225,7 +223,18 @@ class _DossiersState extends State<DossiersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: Text('clients_accounts'.tr(),
+              style:  customStyleLetterSpace(Colors.white, 18, FontWeight.w700, 0.33)),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(FontAwesomeIcons.times, color: Theme.of(context).accentColor,),
+              onPressed: (){Navigator.of(context).pop();},
+            )],
+        ),
         body:
               SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -238,9 +247,9 @@ class _DossiersState extends State<DossiersPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
 
-                              _rangeDate(),
-                              _customizedRangeDateSelect(),
-                              _selectPeriode(),
+                              //_rangeDate(),
+                            //  _customizedRangeDateSelect(),
+                            //  _selectPeriode(),
                               searchField(),
 
                            (response_status != "connexion_failed") ?
@@ -284,8 +293,6 @@ class _DossiersState extends State<DossiersPage> {
     );
    }
 
-
-
   // Let's create a DataTable and show the employee list in it.
   SingleChildScrollView _dataBody() {
   //Widget _dataBody() {
@@ -304,7 +311,7 @@ class _DossiersState extends State<DossiersPage> {
             child: ConstrainedBox(
               constraints: BoxConstraints.expand(
                   width: MediaQuery.of(context).size.width,
-                  height: (_filterDossiers.length  == 0 ? 100.0 : 65 + 44.0 * _filterDossiers.length)
+                  height: (_filterClients.length  == 0 ? 100.0 : 65 + 44.0 * _filterClients.length)
               ),
 
               child: DataTable(
@@ -326,7 +333,7 @@ class _DossiersState extends State<DossiersPage> {
                    // width: 40,
 
                         child: Text(
-                          'N°',
+                          'Client',
                           style: TextStyle(color: Colors.blue, fontSize: 8.5),
                           textAlign: TextAlign.left,
                         ),
@@ -340,44 +347,17 @@ class _DossiersState extends State<DossiersPage> {
                     label: Container(
                       padding: EdgeInsets.all(0.0),
                      // width: 130,
-                      child: Center(
-                        child: Text(
-                          'Client',
-                          style: TextStyle(color: Colors.blue, fontSize: 8.5),
-                        ),
-                      ),
+                          child: Center(
+                            child: Text(
+                              'Encours',
+                              style: TextStyle(color: Colors.blue, fontSize: 8.5),
+                            ),
+                          )
                     )
-                  ),
-                  DataColumn(label: _verticalDivider),
-                  // Lets add one more column to show a see button and update button
-                  DataColumn(
-                      label: Container(
-                        padding: EdgeInsets.all(0.0),
-                       // width: 50,
-                        child: Center(
-                          child: Text(
-                            'Statut',
-                            style: TextStyle(color: Colors.blue, fontSize: 8.5),
-                          ),
-                        ),
-                      )
                   )
-                  /*DataColumn(
-                    label: Container(
-                      padding: EdgeInsets.all(0.0),
-                      width: 50,
-                      child: Center(
-                        child: Text(
-                          'Actions',
-                          style: TextStyle(color: Colors.blue, fontSize: 8.5),
-                        ),
-                      ),
-                    )
-                  )*/
-
                 ],
                 // the list should show the filtered list now
-                rows: _filterDossiers.length > 0 ? _filterDossiers
+                rows: _filterClients.length > 0 ? _filterClients
                     .map(
                       (dossier) => DataRow(cells: [
 
@@ -385,7 +365,7 @@ class _DossiersState extends State<DossiersPage> {
                       Container(
                        // width: 40,
                         padding: EdgeInsets.all(0.0),
-                        child: Text(dossier.numero_dossier,
+                        child: Text(dossier.tiDescription.toUpperCase(),
                             textAlign: TextAlign.left,
                           style: TextStyle(
                           color: Colors.white,
@@ -395,9 +375,9 @@ class _DossiersState extends State<DossiersPage> {
                         alignment: Alignment.centerLeft
                       ),
                       onTap: () {
-                        _seeDossier(dossier);
+                        _seeClient(dossier);
                         // Set the Selected employee to Update
-                        _selectedDossier = dossier;
+                        _selectedClient = dossier;
                         setState(() {
                           _isUpdating = true;
                         });
@@ -409,97 +389,26 @@ class _DossiersState extends State<DossiersPage> {
                       Container(
                        // width: 130,
                         padding: EdgeInsets.all(0.0),
-                        child: Text(
-                          dossier.ClientName.toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.white,
-                                fontSize: 10.0
-                            ),
-                          maxLines: 3,
-                        ),
+                          child: Text(
+                            dossier.solde,
+                              style: TextStyle(
+                                color: Colors.white,
+                                  fontSize: 10.0
+                              ),
+                            maxLines: 3,
+                          ),
+
                       ),
                       onTap: () {
-                        _seeDossier(dossier);
+                        _seeClient(dossier);
                         // Set the Selected employee to Update
-                        _selectedDossier = dossier;
+                        _selectedClient = dossier;
                         // Set flag updating to true to indicate in Update Mode
                         setState(() {
                           _isUpdating = true;
                         });
                       },
-                    ),
-                    DataCell(_verticalDivider),
-                    DataCell(
-                        Container(
-                         // width: 50,
-                          padding: EdgeInsets.all(0.0),
-                          //child: Expanded(
-                          alignment : Alignment.center,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                             // mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                      dossier.StatusName.toUpperCase(),
-                                    style:  TextStyle(
-                                        color:
-                                        dossier.couleur_label.contains('rgb') ? Colors.red : Color(int.parse(dossier.couleur_label.replaceAll('#', '0xff'))),
-                                        fontSize: 10.0
-                                    ),
-                                      maxLines: 3,
-                                  )
-                                )
-                                /*Expanded(child:  IconButton(
-                                    icon: Icon(Icons.remove_red_eye, color: Colors.white,),
-                                    iconSize: 18.0,
-                                    alignment: Alignment.centerLeft,
-                                    padding: EdgeInsets.all(1.0),
-
-                                    onPressed: () {
-                                      _seeDossier(dossier);
-                                    },
-
-                                ), ),*/
-                               /* Expanded(
-                                  child: IconButton(
-                                    icon: Icon(Icons.edit, color: Colors.green,),
-                                    iconSize: 18.0,
-                                    alignment: Alignment.centerLeft,
-                                    padding: EdgeInsets.all(1.0),
-                                    onPressed: () {
-                                     // _editDossier(dossier);
-                                    },
-
-                                  ),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red,),
-                                    iconSize: 18.0,
-                                    alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.all(1.0),
-                                    onPressed: () {
-                                      // _editDossier(dossier);
-                                    },
-
-                                  ),
-                                )*/
-
-                              ],
-                            ),
-                          //),
-                        ),
-                      onTap: () {
-                        _seeDossier(dossier);
-                        // Set the Selected employee to Update
-                        _selectedDossier = dossier;
-                        // Set flag updating to true to indicate in Update Mode
-                        setState(() {
-                          _isUpdating = true;
-                        });
-                      },
-                      )
+                    )
                   ]),
                 )
                     .toList() :
@@ -515,7 +424,7 @@ class _DossiersState extends State<DossiersPage> {
                           // width: 130,
                            width: MediaQuery.of(context).size.width,
                            padding: EdgeInsets.all(0.0),
-                           child: Text("Aucun dossier.",
+                           child: Text("Aucun client actif.",
                              textAlign: TextAlign.center,
                              style: TextStyle(
                                  color: Colors.white,
@@ -533,15 +442,14 @@ class _DossiersState extends State<DossiersPage> {
           )
            ,
            //;
-
        ),
 
     );
   }
 
-  _seeDossier(GetDossier dossier){
+  _seeClient(GetClient client){
 
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeDossierPage(dossier: dossier,)));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeClientPage(client: client,)));
 
   }
 

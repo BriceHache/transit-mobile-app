@@ -43,11 +43,12 @@ class _SplashScreenPageState extends State<SplashScreenPage> with TickerProvider
 
         signInBloc = BlocProvider.of<SignInBloc>(context);
 
-        signInBloc.listen((state) { 
+        signInBloc.listen((state) async {
           print(state);
           if(state is CheckIfSignedInCompletedState ){
             if( state.res ){
 
+              userId = await storage.read(key: 'userId');
               print('user id : ');
               print(userId);
 
@@ -95,30 +96,34 @@ class _SplashScreenPageState extends State<SplashScreenPage> with TickerProvider
          body: Container(
            padding: EdgeInsets.only(left: 20, right: 20),
             
-           child: Column(
-             children: [
+          
+             child: Column(
+               children: [
 
-               Container(
-                 padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * .3),
-                 child: Align(
-                   alignment: Alignment.center,
-                   child: Column(
-                     children: [
-                       RotationTransition(
-                         turns: Tween(begin: 0.0, end: 1.0).animate(_controller),
-                         child: Center(child: Logo(title: ''))
-                        ),
-                        SizedBox(height: 5,),
-                        Text('company_name'.tr(), style: customStyle(Colors.white, 25, FontWeight.bold)
-                        ,),
-                        SizedBox(height: 5,),
+                 Container(
+                   padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * .3),
+                   child: Align(
+                     alignment: Alignment.center,
+                     child: Column(
+                       children: [
+                         RotationTransition(
+                           turns: Tween(begin: 0.0, end: 1.0).animate(_controller),
+                           child: Center(child: Logo(title: ''))
+                          ),
+                          SizedBox(height: 5,),
 
-                     ],
-                   ),
-                 )
-                )
-             ],
-           ),
+                            Text('company_name'.tr(), style: customStyle(Colors.white, 25, FontWeight.bold)
+                            ,),
+
+                          //SizedBox(height: 5,),
+
+                       ],
+                     ),
+                   )
+                  )
+               ],
+             ),
+          
          )
          
       ),

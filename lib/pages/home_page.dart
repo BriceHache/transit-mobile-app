@@ -1,3 +1,4 @@
+import 'package:ball_on_a_budget_planner/clients/clients_list_overview.dart';
 import 'package:ball_on_a_budget_planner/dossiers/dossiers_list.dart';
 import 'package:ball_on_a_budget_planner/dossiers/frais_dossiers_list.dart';
 import 'package:ball_on_a_budget_planner/dossiers/pieces_jointes_dossiers_list.dart';
@@ -7,27 +8,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:ball_on_a_budget_planner/pages/budgets/add_budget_page.dart';
-import 'package:ball_on_a_budget_planner/pages/budgets/add_budget_temp.dart';
-import 'package:ball_on_a_budget_planner/pages/budgets/budgtes_page.dart';
-import 'package:ball_on_a_budget_planner/pages/category/add_category.dart';
-import 'package:ball_on_a_budget_planner/pages/category/category_list.dart';
-import 'package:ball_on_a_budget_planner/pages/cc_expenses/add_expense.dart';
-import 'package:ball_on_a_budget_planner/pages/cc_expenses/expenses_page.dart';
 import 'package:ball_on_a_budget_planner/pages/dashboard.dart';
-import 'package:ball_on_a_budget_planner/pages/incomes/add_incomes.dart';
-import 'package:ball_on_a_budget_planner/pages/incomes/incomes_page.dart';
-import 'package:ball_on_a_budget_planner/pages/settings/setting_page.dart';
+
 import 'package:ball_on_a_budget_planner/pages/settings/language_settings.dart';
 import 'package:ball_on_a_budget_planner/pages/profile_page.dart';
 import 'package:ball_on_a_budget_planner/banklin_icons.dart';
 import 'package:ball_on_a_budget_planner/bloc/sign_in_bloc/sign_in_bloc_bloc.dart';
 import 'package:ball_on_a_budget_planner/helpers/styles_custom.dart';
-import 'package:ball_on_a_budget_planner/helpers/next_screen.dart';
+
 import 'package:ball_on_a_budget_planner/widgets/logo.dart';
 import 'package:tuple/tuple.dart';
 
@@ -62,6 +55,9 @@ class _HomePageState extends State<HomePage> {
 
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(Duration(days: 7));
+
+  String userRole = "Employe";
+  final storage = new FlutterSecureStorage();
   
 
   @override
@@ -99,6 +95,7 @@ class _HomePageState extends State<HomePage> {
 
 
     super.initState();
+    setUserRole();
 
 
   }
@@ -107,7 +104,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
    
    return Scaffold(
-     
      key: _scaffoldKey,
      drawer: drawerMenu(),
      
@@ -116,7 +112,6 @@ class _HomePageState extends State<HomePage> {
             animatedIcon: AnimatedIcons.add_event,
             backgroundColor: Theme.of(context).accentColor,
             activeBackgroundColor: Theme.of(context).accentColor,
-           
             marginBottom: 50,
             children: [
              /* SpeedDialChild(
@@ -150,15 +145,19 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => FraisDossiersPage(dossier: new GetDossier(id: 0, numero_dossier: 'non défini'), showDossiers: true)));
                   } 
               ),
-              /*SpeedDialChild(
+              (userRole.toString().toUpperCase() == "ADMIN" || userRole.toString().toUpperCase() == "SUPERADMIN" || userRole.toString().toUpperCase() == "OWNER" ) ?
+              SpeedDialChild(
                 backgroundColor: Theme.of(context).accentColor,
                 child: Icon(FontAwesomeIcons.moneyCheck),
-                label: 'add_budget_temp'.tr(), labelBackgroundColor: Colors.white,
+                label: 'clients_accounts'.tr(), labelBackgroundColor: Colors.white,
                 onTap: () {
-                   
-                  nextScreen(context, AddTempBudgetPage());
+                 // nextScreen(context, AddTempBudgetPage());
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ClientsOverviewPage(_startDate, _endDate)));
                 } 
-              ),
+              )
+              :
+              null
+              /*,
               SpeedDialChild(
                 backgroundColor: Theme.of(context).accentColor,
                 child: Icon(FontAwesomeIcons.moneyCheckAlt),
@@ -373,7 +372,8 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-      ), barrierDismissible: false,
+      ),
+      barrierDismissible: false,
       context: context,
     );
   }
@@ -602,4 +602,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void setUserRole()async{
+    userRole = await storage.read(key: 'role');
+    print('user role : ' + userRole);
+    setState(() {
+
+    });
+  }
 }

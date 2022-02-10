@@ -105,6 +105,16 @@ import 'package:easy_localization/easy_localization.dart';
   return new Tuple2<DateTime, DateTime>(firstDate, lastDate);
 }
 
+// Jusqu'à Aujourdhui
+
+Tuple2<DateTime, DateTime> UpToNow()
+{
+  DateTime firstDate = new DateTime(2020, 1, 1);
+  DateTime today = DateTime.now();
+
+  return new Tuple2<DateTime, DateTime>(firstDate, today);
+}
+
 List<Tuple2<DateTime, DateTime>> PredefinedRangeDates()
 {
   List<Tuple2<DateTime, DateTime>> pdates = List<Tuple2<DateTime, DateTime>>.empty(growable: true);
@@ -119,6 +129,7 @@ List<Tuple2<DateTime, DateTime>> PredefinedRangeDates()
   pdates.add(LastThreeMonths());
   pdates.add(LastSixMonths());
   pdates.add(LastYear());
+  pdates.add(UpToNow());
 
   return pdates;
 }
@@ -138,6 +149,7 @@ List<Tuple2<String,Tuple2<DateTime, DateTime>>> PredefinedRangeDatesWithKeys()
   pdateswithk.add(new Tuple2<String,Tuple2<DateTime, DateTime>>("last_three_months".tr(),LastThreeMonths()));
   pdateswithk.add(new Tuple2<String,Tuple2<DateTime, DateTime>>("last_six_months".tr(),LastSixMonths()));
   pdateswithk.add(new Tuple2<String,Tuple2<DateTime, DateTime>>("last_year".tr(),LastYear()));
+  pdateswithk.add(new Tuple2<String,Tuple2<DateTime, DateTime>>("all_period".tr(),UpToNow()));
 
   return pdateswithk;
 }
@@ -157,7 +169,8 @@ DropListModel rangeDateListModel(){
         OptionItem(id: "7", title: "last_month".tr()),
         OptionItem(id: "8", title: "last_three_months".tr()),
         OptionItem(id: "9", title: "last_six_months".tr()),
-        OptionItem(id: "10", title: "last_year".tr())
+        OptionItem(id: "10", title: "last_year".tr()),
+        OptionItem(id: "11", title: "all_period".tr())
       ]);
 
   return dropListModel;

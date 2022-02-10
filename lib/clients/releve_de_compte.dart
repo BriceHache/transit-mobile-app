@@ -1,36 +1,57 @@
 import 'dart:async';
-import 'package:ball_on_a_budget_planner/dossiers/see_dossier.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:ball_on_a_budget_planner/clients/see_files_in_directory.dart';
+import 'package:ball_on_a_budget_planner/clients/see_internal_document.dart';
+import 'package:ball_on_a_budget_planner/clients/see_releve.dart';
 import 'package:ball_on_a_budget_planner/helpers/common_range_date.dart';
+import 'package:ball_on_a_budget_planner/helpers/show_alert.dart';
 import 'package:ball_on_a_budget_planner/helpers/styles_custom.dart';
+import 'package:ball_on_a_budget_planner/models/client_datatable.dart';
+import 'package:ball_on_a_budget_planner/models/get_client.dart';
+import 'package:ball_on_a_budget_planner/models/get_client_details.dart';
+import 'package:ball_on_a_budget_planner/models/releve.dart';
+import 'package:ball_on_a_budget_planner/widgets/button_fixe_width_widget.dart';
+import 'package:ball_on_a_budget_planner/widgets/button_widget.dart';
+import 'package:ball_on_a_budget_planner/widgets/button_width_flexible_dimensions.dart';
 import 'package:ball_on_a_budget_planner/widgets/large_button.dart';
 import 'package:ball_on_a_budget_planner/widgets/nice_text.dart';
+import 'package:ball_on_a_budget_planner/widgets/profile_tile.dart';
+import 'package:ball_on_a_budget_planner/widgets/recap_solde_card.dart' as cw;
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:ball_on_a_budget_planner/models/datatable.dart';
-import 'package:ball_on_a_budget_planner/models/get_dossier.dart';
+import 'package:ball_on_a_budget_planner/models/get_client.dart';
 import 'package:ball_on_a_budget_planner/resources/api_provider.dart';
 
 import 'package:dio/dio.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tuple/tuple.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:pdf/widgets.dart' as pw ;
 
-class DossiersPage extends StatefulWidget {
+
+class ReleveDeComptePage extends StatefulWidget {
 
   //Static references to our parent widget variables
   final DateTime From_date;
   final DateTime To_date;
+  final GetClient client;
 
-  DossiersPage(DateTime from,DateTime to):
+
+  ReleveDeComptePage(DateTime from,DateTime to, GetClient _client):
         this.From_date = from,
-        this.To_date = to
+        this.To_date = to,
+        this.client = _client
   ;
-
   @override
-  _DossiersState createState() => _DossiersState();
-
+  _ReleveDeComptePageState createState() => _ReleveDeComptePageState();
 }
-
 
 class Debouncer {
   final int milliseconds;
@@ -47,22 +68,25 @@ class Debouncer {
     // then we will start a new timer looking for the user to stop
     _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
-
 }
 
 
-class _DossiersState extends State<DossiersPage> {
+class _ReleveDeComptePageState extends State<ReleveDeComptePage> {
 
   bool _isUpdating;
   String _titleProgress;
   bool _isloading;
+  bool _isloadingDoc;
   String response_status ;
+  GetClient current_client = new GetClient();
+  //= new GetClient();
+  String downloadPath;
 
-  List<GetDossier> _dossiers;
-  // this list will hold the filtered dossiers
-  List<GetDossier> _filterDossiers;
+  List<GetClientDetails> _clients;
+  // this list will hold the filtered clients
+  List<GetClientDetails> _filterClients;
 
-  GetDossier _selectedDossier;
+  GetClientDetails _selectedClient;
 
   //our variable to use for our dates input
   DateTime _startDate;
@@ -75,28 +99,30 @@ class _DossiersState extends State<DossiersPage> {
 
   Tuple2<String,Tuple2<DateTime, DateTime>> selectedValue;
 
-
+  File currentFile;
 
   @override
   void initState() {
 
     super.initState();
 
-    _dossiers = [];
-    _filterDossiers = [];
+    _clients = [];
+    _filterClients = [];
     _isUpdating = false;
     _isloading = true;
+    _isloadingDoc = false;
     response_status = "ongoing";
 
     _startDate =  widget.From_date ;
     _endDate = widget.To_date;
     _searchValue = "";
+    current_client = widget.client;
 
-    _getDossiers();
+    _getClients();
 
     rangeDates = PredefinedRangeDatesWithKeys();
-
     selectedValue = rangeDates[0];
+
   }
 
   // Method to update title in the AppBar Title
@@ -122,8 +148,7 @@ class _DossiersState extends State<DossiersPage> {
 
       });
     }
-
-    _getDossiers();
+    _getClients();
   }
 
   Future setDateRange(DateTime from, DateTime to) async {
@@ -131,27 +156,27 @@ class _DossiersState extends State<DossiersPage> {
       _startDate = from;
       _endDate = to;
       _isloading = true;
-      _getDossiers();
+      _getClients();
     });
   }
 
-  _getDossiers() {
-    _showProgress('Chargement des dossiers...');
-    RequestParamDataTable _dossierDataTable = new RequestParamDataTable(
+  _getClients() {
+    _showProgress('Chargement des transactions...');
+    ClientRequestParamDataTable _clientDataTable = new ClientRequestParamDataTable(
       start_date :  DateFormat('dd/MM/yyyy').format(_startDate).toString(),
        end_date : DateFormat('dd/MM/yyyy').format(_endDate).toString(),
-      sSearch: _searchValue
+      sSearch: _searchValue,
+      client_id: current_client.Id
     );
 
-    Future<Tuple2<List<GetDossier>, String>> dossiersGlobalResponse =  ApiProvider.GetAllDossiers(_dossierDataTable);
-    dossiersGlobalResponse.then((_realResponse) {
+    Future<Tuple2<List<GetClientDetails>, String>> clientsGlobalResponse =  ApiProvider.GetRecapClient(_clientDataTable);
+    clientsGlobalResponse.then((_realResponse) {
       setState(() {
-        _dossiers = _realResponse.item1;
+        _clients = _realResponse.item1;
 
         // Initialize to the list from Server when reloading...
-        _filterDossiers = _realResponse.item1;
+        _filterClients = _realResponse.item1;
 
-        //
         if(_realResponse.item2 == "Success"){
           response_status = "success";
         }else if(_realResponse.item2 == "Error"){
@@ -184,7 +209,7 @@ class _DossiersState extends State<DossiersPage> {
                         decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(5.0),
 
-                            hintText: 'Recherche',
+                            hintText: 'Filtrer (N° de client / nom du client)',
                             fillColor: Colors.white,
                             hintStyle: TextStyle(color: Colors.grey)
 
@@ -196,13 +221,11 @@ class _DossiersState extends State<DossiersPage> {
                           // Filter the original List and update the Filter list
                           setState(() {
                             _isloading = true;
-                            _filterDossiers = _dossiers
-                                .where((u) => (
-                                  u.numero_dossier.toLowerCase().contains(string.toLowerCase()) ||
-                                  u.ClientName.toLowerCase().contains(string.toLowerCase()) ||
-                                  u.numeroBLS.toLowerCase().contains(string.toLowerCase()) ||
-                                  u.ensemble_numeros_containers.toLowerCase().contains(string.toLowerCase())
-                                ))
+                            _filterClients = _clients
+                                .where((u) => (u.DescriptionClient
+                                .toLowerCase()
+                                .contains(string.toLowerCase()) ||
+                                u.Description.toLowerCase().contains(string.toLowerCase())))
                                 .toList();
 
                             _isloading = false;
@@ -226,6 +249,30 @@ class _DossiersState extends State<DossiersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: Text('releve_de_compte'.tr() + '-' + current_client.tiDescription,
+              style:  customStyleLetterSpace(Colors.white, 10, FontWeight.w700, 0.33)),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.picture_as_pdf,
+                  //color: Colors.red
+                  color: Theme.of(context).accentColor
+              ),
+              onPressed: () {
+
+                generateReport();
+                //currentFile.writeAsBytes(bytes);
+              },
+            ),
+            IconButton(
+              icon: Icon(FontAwesomeIcons.times,
+                color: Theme.of(context).accentColor,),
+              onPressed: (){Navigator.of(context).pop();},
+            )],
+        ),
         body:
               SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -237,20 +284,21 @@ class _DossiersState extends State<DossiersPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-
+                              Container(
+                                  child:
+                                  _isloadingDoc ? _buildLoading() :  null
+                              ),
                               _rangeDate(),
                               _customizedRangeDateSelect(),
                               _selectPeriode(),
-                              searchField(),
+                              //searchField(),
 
                            (response_status != "connexion_failed") ?
 
                                 // Expanded(
                                    // child:
                            Container(
-
                                child:
-
                                     _isloading ? _buildLoading() :  _dataBody()
                            )
                                    // )
@@ -304,7 +352,7 @@ class _DossiersState extends State<DossiersPage> {
             child: ConstrainedBox(
               constraints: BoxConstraints.expand(
                   width: MediaQuery.of(context).size.width,
-                  height: (_filterDossiers.length  == 0 ? 100.0 : 65 + 44.0 * _filterDossiers.length)
+                  height: (_filterClients.length  == 0 ? 100.0 : 65 + 44.0 * _filterClients.length)
               ),
 
               child: DataTable(
@@ -326,7 +374,7 @@ class _DossiersState extends State<DossiersPage> {
                    // width: 40,
 
                         child: Text(
-                          'N°',
+                          'Date',
                           style: TextStyle(color: Colors.blue, fontSize: 8.5),
                           textAlign: TextAlign.left,
                         ),
@@ -342,7 +390,7 @@ class _DossiersState extends State<DossiersPage> {
                      // width: 130,
                       child: Center(
                         child: Text(
-                          'Client',
+                          'Description',
                           style: TextStyle(color: Colors.blue, fontSize: 8.5),
                         ),
                       ),
@@ -356,51 +404,47 @@ class _DossiersState extends State<DossiersPage> {
                        // width: 50,
                         child: Center(
                           child: Text(
-                            'Statut',
+                            'Débit',
                             style: TextStyle(color: Colors.blue, fontSize: 8.5),
                           ),
                         ),
                       )
-                  )
-                  /*DataColumn(
+                  ),
+                  DataColumn(label: _verticalDivider),
+                  DataColumn(
                     label: Container(
                       padding: EdgeInsets.all(0.0),
-                      width: 50,
+                      //width: 50,
                       child: Center(
                         child: Text(
-                          'Actions',
+                          'Crédit',
                           style: TextStyle(color: Colors.blue, fontSize: 8.5),
                         ),
                       ),
                     )
-                  )*/
+                  )
 
                 ],
                 // the list should show the filtered list now
-                rows: _filterDossiers.length > 0 ? _filterDossiers
+                rows: _filterClients.length > 0 ? _filterClients
                     .map(
-                      (dossier) => DataRow(cells: [
+                      (client_t) => DataRow(cells: [
 
                     DataCell(
                       Container(
                        // width: 40,
                         padding: EdgeInsets.all(0.0),
-                        child: Text(dossier.numero_dossier,
+                        child: Text(client_t.date,
                             textAlign: TextAlign.left,
                           style: TextStyle(
                           color: Colors.white,
-                            fontSize: 10.0
+                            fontSize: 8.5
                         ),
                         ),
                         alignment: Alignment.centerLeft
                       ),
                       onTap: () {
-                        _seeDossier(dossier);
-                        // Set the Selected employee to Update
-                        _selectedDossier = dossier;
-                        setState(() {
-                          _isUpdating = true;
-                        });
+
                       },
                     ),
                     DataCell(_verticalDivider),
@@ -410,22 +454,17 @@ class _DossiersState extends State<DossiersPage> {
                        // width: 130,
                         padding: EdgeInsets.all(0.0),
                         child: Text(
-                          dossier.ClientName.toUpperCase(),
+                          (client_t.Description == null)  ? "RAS" :
+                          client_t.Description,
                             style: TextStyle(
                               color: Colors.white,
-                                fontSize: 10.0
+                                fontSize: 8.5
                             ),
                           maxLines: 3,
                         ),
                       ),
                       onTap: () {
-                        _seeDossier(dossier);
-                        // Set the Selected employee to Update
-                        _selectedDossier = dossier;
-                        // Set flag updating to true to indicate in Update Mode
-                        setState(() {
-                          _isUpdating = true;
-                        });
+
                       },
                     ),
                     DataCell(_verticalDivider),
@@ -433,73 +472,41 @@ class _DossiersState extends State<DossiersPage> {
                         Container(
                          // width: 50,
                           padding: EdgeInsets.all(0.0),
-                          //child: Expanded(
-                          alignment : Alignment.center,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                             // mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                      dossier.StatusName.toUpperCase(),
-                                    style:  TextStyle(
-                                        color:
-                                        dossier.couleur_label.contains('rgb') ? Colors.red : Color(int.parse(dossier.couleur_label.replaceAll('#', '0xff'))),
-                                        fontSize: 10.0
-                                    ),
-                                      maxLines: 3,
-                                  )
-                                )
-                                /*Expanded(child:  IconButton(
-                                    icon: Icon(Icons.remove_red_eye, color: Colors.white,),
-                                    iconSize: 18.0,
-                                    alignment: Alignment.centerLeft,
-                                    padding: EdgeInsets.all(1.0),
 
-                                    onPressed: () {
-                                      _seeDossier(dossier);
-                                    },
-
-                                ), ),*/
-                               /* Expanded(
-                                  child: IconButton(
-                                    icon: Icon(Icons.edit, color: Colors.green,),
-                                    iconSize: 18.0,
-                                    alignment: Alignment.centerLeft,
-                                    padding: EdgeInsets.all(1.0),
-                                    onPressed: () {
-                                     // _editDossier(dossier);
-                                    },
-
-                                  ),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red,),
-                                    iconSize: 18.0,
-                                    alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.all(1.0),
-                                    onPressed: () {
-                                      // _editDossier(dossier);
-                                    },
-
-                                  ),
-                                )*/
-
-                              ],
-                            ),
+                            child: Text(
+                              client_t.Debit,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8.5
+                              ),
+                              maxLines: 3,
+                            )
                           //),
                         ),
                       onTap: () {
-                        _seeDossier(dossier);
-                        // Set the Selected employee to Update
-                        _selectedDossier = dossier;
-                        // Set flag updating to true to indicate in Update Mode
-                        setState(() {
-                          _isUpdating = true;
-                        });
+
                       },
-                      )
+                      ),
+                        DataCell(_verticalDivider),
+                        DataCell(
+                          Container(
+                            // width: 50,
+                              padding: EdgeInsets.all(0.0),
+
+                              child: Text(
+                                client_t.Credit,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8.5
+                                ),
+                                maxLines: 3,
+                              )
+                            //),
+                          ),
+                          onTap: () {
+
+                          },
+                        )
                   ]),
                 )
                     .toList() :
@@ -515,7 +522,7 @@ class _DossiersState extends State<DossiersPage> {
                           // width: 130,
                            width: MediaQuery.of(context).size.width,
                            padding: EdgeInsets.all(0.0),
-                           child: Text("Aucun dossier.",
+                           child: Text("Aucune opération.",
                              textAlign: TextAlign.center,
                              style: TextStyle(
                                  color: Colors.white,
@@ -526,23 +533,17 @@ class _DossiersState extends State<DossiersPage> {
                        ),),
                        DataCell(SizedBox.shrink()),
                        DataCell(SizedBox.shrink()),
+                       DataCell(SizedBox.shrink()),
+                       DataCell(SizedBox.shrink())
                      ])
                     ]
               ),
             ),
           )
            ,
-           //;
-
        ),
 
     );
-  }
-
-  _seeDossier(GetDossier dossier){
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeDossierPage(dossier: dossier,)));
-
   }
 
   Widget _rangeDate(){
@@ -667,5 +668,160 @@ class _DossiersState extends State<DossiersPage> {
     color: Colors.blue,
     thickness: 1,
   );
+
+  static double checkDouble(dynamic value) {
+    if (value is String) {
+      return double.parse(value);
+    } else {
+      return value;
+    }
+  }
+
+  final _whitespaceRE = RegExp(r"\s+");
+  String cleanupWhitespace(String input) =>
+      input.replaceAll(_whitespaceRE, "");
+
+
+  void generateReport() async {
+    setState(() {
+      _isloadingDoc = true;
+    });
+
+    var releve = generateReleve();  
+
+    try {
+
+      var status = await Permission.storage.status;
+      if (!status.isGranted) {
+        await Permission.storage.request();
+      }
+
+      String doc_name =  current_client.tiDescription + ' Du_' +
+      DateFormat('dd_MM_yyyy').format(_startDate).toString() + '_au_' +
+      DateFormat('dd_MM_yyyy').format(_endDate).toString() + '.pdf';
+      final output = '/storage/emulated/0/Download/CTI/' +current_client.tiDescription;
+      String path = output +"/" + doc_name;
+
+      var file = new File(path).create(recursive: true)
+          .then((value) async =>
+              {
+                await value.writeAsBytes(await releve),
+               // await value.writeAsBytes(await document.save()),
+                setState(() {
+                  currentFile = value;
+                }),
+
+
+              }
+           );
+      setState(
+              () => downloadPath = output
+      );
+
+      showDialog(
+        builder: (context) =>  AlertDialog(
+          title: Text( 'releve_de_compte'.tr() + '-' + current_client.tiDescription ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child:
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text("Document enregistré." )),
+                    )
+                  ],
+                ),
+
+              ),
+              SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child:
+                  Row(
+                    children: [
+                      FlexibleButton(icon: FontAwesomeIcons.eye,
+                          title: 'Voir', callback: _seeDocs,
+                          color:Colors.deepPurpleAccent
+                          , width: 150,
+                      )
+                    ],
+                  )
+              )
+            ],
+          ) ,
+          actions: [
+            MaterialButton(
+                child: Text('OK'),
+                elevation: 5,
+                textColor: Colors.blue,
+                onPressed: () => Navigator.pop(context)
+            )
+          ],
+          scrollable: true,
+        ),
+        barrierDismissible: false,
+        context: context,
+
+      );
+
+   //   Navigator.push(context, MaterialPageRoute(builder: (context) => SeeInternalDocument(path: path, title: 'releve_de_compte'.tr() + '-' + current_client.tiDescription)));
+
+      print(output);
+      print(doc_name);
+      print(currentFile);
+
+      setState(() {
+        _isloadingDoc = false;
+      });
+
+    }catch (error, stacktrace) {
+      setState(() {
+        _isloadingDoc = false;
+      });
+      showAlert(context, "Une exception est survenue","$error stackTrace: $stacktrace");
+    }
+
+  }
+
+  void _seeDocs() async {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeDirectoryFiles(targetDirectory: downloadPath, title:  current_client.tiDescription)));
+  }
+
+
+  //generate report
+
+   Future<Uint8List> generateReleve() async {
+  final lorem = pw.LoremText();
+  PdfPageFormat pageFormat = PdfPageFormat.a4;
+
+  final releve = Releve(
+    transactions: _filterClients,
+     customerName: current_client.tiDescription,
+     customerAddress: current_client.tiEmail,
+     periode : 'Du ' +  DateFormat('dd/MM/yyyy').format(_startDate).toString() + ' au ' +
+         DateFormat('dd/MM/yyyy').format(_endDate).toString(),
+     devise : "FCFA",
+     paymentInfo: "",
+    baseColor: PdfColors.teal,
+    accentColor: PdfColors.blueGrey900,
+  );
+
+  return await releve.buildPdf(pageFormat);
+}
+
+
+
+String _formatCurrency(double amount) {
+  return '\$${amount.toStringAsFixed(2)}';
+}
+
+String _formatDate(DateTime date) {
+  final format = DateFormat.yMMMd('en_US');
+  return format.format(date);
+}
+
 
 }

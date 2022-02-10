@@ -4,6 +4,7 @@ import 'dart:io';
 
 
 import 'package:advance_pdf_viewer/advance_pdf_viewer.dart';
+import 'package:ball_on_a_budget_planner/clients/see_files_in_directory.dart';
 import 'package:ball_on_a_budget_planner/dossiers/pieces_jointes_dossiers_list.dart';
 import 'package:ball_on_a_budget_planner/helpers/dialog.dart';
 import 'package:ball_on_a_budget_planner/helpers/show_alert.dart';
@@ -16,7 +17,9 @@ import 'package:ball_on_a_budget_planner/models/income.dart';
 import 'package:ball_on_a_budget_planner/resources/api_provider.dart';
 import 'package:ball_on_a_budget_planner/widgets/budget_temp_card.dart';
 import 'package:ball_on_a_budget_planner/widgets/budgets_card.dart';
+import 'package:ball_on_a_budget_planner/widgets/button_fixe_width_widget.dart';
 import 'package:ball_on_a_budget_planner/widgets/button_widget.dart';
+import 'package:ball_on_a_budget_planner/widgets/button_width_flexible_dimensions.dart';
 import 'package:ball_on_a_budget_planner/widgets/nice_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -27,6 +30,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tuple/tuple.dart';
 //import 'package:universal_html/html.dart';
 
@@ -51,6 +55,7 @@ class _SeePieceJointeDossierPageState extends State<SeePieceJointePage> {
   bool _isLoading = true;
   PDFDocument document;
   File currentFile;
+  String downloadPath;
 
   PieceJointeDossier pieceJointe = new PieceJointeDossier();
   PieceJointeDossier downloadPJ;
@@ -103,26 +108,80 @@ class _SeePieceJointeDossierPageState extends State<SeePieceJointePage> {
     });
 
   }
+
+
   downloadDocument() async {
+
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
 
     String fileName = downloadPJ.file_name;
     var bytes = base64Decode(downloadPJ.file_base6.replaceAll('\n', ''));
-    //final output = await getDownloadsDirectory();
-    //final output = await getApplicationDocumentsDirectory();
-    //final file = File("${output.path}/$fileName.pdf");
 
-    //Directory root = await getTemporaryDirectory();
-   // String directoryPath = root.path + '/Documents/CTI/Documents_Dossier_Numero_'+downloadPJ.dossier_id.toString()+ "/"+fileName;
-    String directoryPath = '/storage/emulated/0/Download/' + 'CTI/Documents_Dossier_Numero_'+downloadPJ.dossier_id.toString()+ "/"+fileName;
-    final file =  new File(directoryPath).create(recursive: true)
+    String directoryPath = '/storage/emulated/0/Download/' + 'CTI/Dossier_Numero_'+downloadPJ.dossier_id.toString();
+    String absolutedPath = directoryPath +  "/"+fileName;
+
+    setState(
+            () => downloadPath = directoryPath
+    );
+
+    final file =  new File(absolutedPath).create(recursive: true)
     .then((File file) async {
         await file.writeAsBytes(bytes);
     });
 
-     //await file.writeAsBytes(bytes);
     print('path :' + directoryPath );
 
-    showAlert(context, pieceJointe.nom_abrege, "Document téléchargé avec succès.");
+    showDialog(
+      builder: (context) =>  AlertDialog(
+        title: Text( pieceJointe.nom_abrege ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+          SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+           
+             child: Row(
+                children: [
+                   Container(
+                       child: Center
+                         (child:
+                       Text("Document téléchargé." )))
+                ],
+              ),
+           
+          ),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+           child: Row(
+              children: [
+                FlexibleButton(
+                    icon: FontAwesomeIcons.eye,
+                    title: 'Voir',
+                    callback: _seePiecesJointes,
+                    color:Colors.deepPurpleAccent
+                    , width: 150,
+                )
+              ],
+            )
+      )
+          ],
+        ) ,
+        actions: [
+          MaterialButton(
+              child: Text('OK'),
+              elevation: 5,
+              textColor: Colors.blue,
+              onPressed: () => Navigator.pop(context)
+          )
+        ],
+        scrollable: true,
+      ),
+      barrierDismissible: false,
+      context: context,
+    );
 
   }
 
@@ -162,39 +221,6 @@ class _SeePieceJointeDossierPageState extends State<SeePieceJointePage> {
                         lazyLoad: false,
                           // uncomment below line to scroll vertically
                         scrollDirection: Axis.vertical,
-                   /* navigationBuilder:
-                      (context, page, totalPages, jumpToPage, animateToPage) {
-                    return ButtonBar(
-                      alignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.first_page),
-                          onPressed: () {
-                            jumpToPage(page: 0);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.arrow_back),
-                          onPressed: () {
-                            animateToPage(page: page - 2);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.arrow_forward),
-                          onPressed: () {
-                            animateToPage(page: page);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.last_page),
-                          onPressed: () {
-                            jumpToPage(page: totalPages - 1);
-                          },
-                        ),
-
-                      ],
-                    );
-                  },*/
 
                 )
       )
@@ -202,11 +228,7 @@ class _SeePieceJointeDossierPageState extends State<SeePieceJointePage> {
       );
   }
 
-
- /* void createFileRecursively(String filename) {
-    // Create a new directory, recursively creating non-existent directories.
-    new Directory.fromPath(new Path(filename).directoryPath)
-        .createSync(recursive: true);
-    new File(filename).createSync();
-  }*/
+  void _seePiecesJointes() async {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SeeDirectoryFiles(targetDirectory: downloadPath, title: pieceJointe.nom_abrege)));
+  }
 }

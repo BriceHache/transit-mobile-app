@@ -68,6 +68,8 @@
     "transporteur" : "Transporter",
     "Amount" : "Amount",
     "armateur" : "Armateur",
+    "releve_de_compte": "Account Widthrawhal",
+    "clients_accounts": "Companies Accounts",
 
     "emblem": "Reach Your Goals Even Faster",
 
@@ -307,6 +309,7 @@
     "last_six_months": "Last six months",
     "last_year": "Last year",
     "customized": "Customized",
+    "all_period": "All",
     "add_document_number": "Add a document N°",
     "aucun": "Empty",
     "select_doc_type": "---Select an document type---"

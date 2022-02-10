@@ -99,7 +99,6 @@ class __FormState extends State<_Form> {
         listener: (_, state) {
           if (state is SignInEmailProgressState) {
             print('sign in with email in progress');
-
             setState((){
               inProgress = true;
             });
@@ -107,12 +106,16 @@ class __FormState extends State<_Form> {
           }
           if (state is SignInEmailFailedState) {
             //failed
-            showAlert(context, 'L\'authentification a échoué!','${state.res} ');
+            if(state.res == "Failed host lookup: 'www.app.cti-gabon.com'"){
+              showAlert(context, 'L\'authentification a échoué!','Veuillez vérifier votre connexion internet.');
+            }else{
+              showAlert(context, 'L\'authentification a échoué!','${state.res} ');
+            }
             print('sign in with email failed');
+            print(state.res);
             setState(() {
               inProgress = false;
             });
-      
           }
           if (state is SignInEmailCompletedState) {
             Navigator.pushReplacement(context, navegateFadein(context, OnBoardingPage()));

@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:ball_on_a_budget_planner/bloc/statistics_bloc/statistics_bloc.dart';
+import 'package:ball_on_a_budget_planner/clients/clients_list_overview.dart';
 import 'package:ball_on_a_budget_planner/dossiers/dossiers_list.dart';
 import 'package:ball_on_a_budget_planner/dossiers/dossiers_overview_list.dart';
 import 'package:ball_on_a_budget_planner/helpers/common_range_date.dart';
@@ -66,6 +67,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   String userid;
   final storage = new FlutterSecureStorage();
+  String userRole = "Employe";
 
 
   DateTime _startDate = DateTime.now();
@@ -86,6 +88,8 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
 
     setUserid();
+    setUserRole();
+
     isSearching = false;
 
     DateTime now = DateTime.now();
@@ -189,7 +193,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                               DateFormat('dd/MM/yyyy').format(_startDate).toString(),
                                               'debut'.tr(),
                                               Colors.green, type: "date", textStyle: 12,)
-
                                         ],
 
                                       )
@@ -203,8 +206,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                               DateFormat('dd/MM/yyyy').format(_endDate).toString(),
                                               'fin'.tr(),
                                               Colors.green,type: "date",textStyle: 12,)
-
-                                        ],
+                                        ]
+                                        ,
 
                                       )
 
@@ -376,16 +379,17 @@ class _DashboardPageState extends State<DashboardPage> {
                   return Container(
                     margin: EdgeInsets.all(8.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                     // mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        SizedBox(height: 10,),
+                        //SizedBox(height: 10,),
                         Text( state.message ,
                             style: customStyleLetterSpace(Colors.white, 20, FontWeight.w800,0.338)),
                         SizedBox(height: 20,),
                         Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
-                               Image.asset('assets/images/no_data2.png',height: 200)
+                               Image.asset('assets/images/no_data2.png'
+                                   ,height: 200)
                           ],
                         )
 
@@ -397,14 +401,14 @@ class _DashboardPageState extends State<DashboardPage> {
                     return Container(
                         margin: EdgeInsets.all(8.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          //mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                              SizedBox(height: 10,),
+                              //SizedBox(height: 10,),
                               Text( "Pas de connexion internet." ,
                               style: customStyleLetterSpace(Colors.white, 14, FontWeight.w800,0.338)),
                               SizedBox(height: 20,),
                               Row(
-                                mainAxisSize: MainAxisSize.min,
+                                mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                     Image.asset('assets/images/no_data.png',height: 200)
                                 ],
@@ -510,9 +514,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         TextButton(
                           onPressed: (){
-                            nextScreen(context, AddIncomePage());
-                          },
+                            (userRole.toString().toUpperCase() == "ADMIN" || userRole.toString().toUpperCase() == "SUPERADMIN" || userRole.toString().toUpperCase() == "OWNER" ) ?
 
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => ClientsOverviewPage(_startDate, _endDate)))
+                            :
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => DossiersOverviewPage(_startDate, _endDate)));
+                            //nextScreen(context, AddIncomePage());
+                          },
                           child: Column(
                             children: [
 
@@ -729,6 +737,14 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
     );
+  }
+
+  void setUserRole()async{
+    userRole = await storage.read(key: 'role');
+    print('user role : ' + userRole);
+    setState(() {
+
+    });
   }
 
   String _getStats(String value, {type = "number", devise = "FCFA"}){

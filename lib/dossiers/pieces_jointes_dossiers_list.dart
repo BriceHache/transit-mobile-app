@@ -669,9 +669,9 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                         // Set the Selected employee to Update
                         _selectedPieceJointeDossier = piecejointedossier;
                         // Set flag updating to true to indicate in Update Mode
-                        setState(() {
+                       /* setState(() {
                           _isUpdating = true;
-                        });
+                        });*/
                       },
                     ),
                     DataCell(_verticalDivider),
@@ -695,9 +695,9 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
                         // Set the Selected employee to Update
                         _selectedPieceJointeDossier = piecejointedossier;
                         // Set flag updating to true to indicate in Update Mode
-                        setState(() {
+                       /* setState(() {
                           _isUpdating = true;
-                        });
+                        });*/
                       },
                     ),
                     DataCell(_verticalDivider),
@@ -872,10 +872,7 @@ class _PieceJointeDossierPageState extends State<PieceJointeDossiersPage> {
     if(formkey.currentState.validate()){
       formkey.currentState.validate();
       if( _paths != null ){
-
-
           _saveDocument();
-
       }else{
         openDialog(context, '', 'select_file'.tr());
       }

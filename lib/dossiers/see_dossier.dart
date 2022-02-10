@@ -61,8 +61,6 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
 
   }
 
-  
-
   void setUserid()async{
      userid = await storage.read(key: 'userId');
    print(userid);
@@ -119,6 +117,26 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
       padding: EdgeInsets.only(top: 5, left: 15, right: 15),
       child : Column(
         children: <Widget>[
+              SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.date_booking_string == null && dossier.date_booking_string != "")  ? "RAS" :
+                          dossier.date_booking_string,
+                          'DATE DE RECEPTION : ',
+                          Colors.green, type: "date")
+
+                    ],
+
+                  )
+                ]
+            ),
+          ),
               SingleChildScrollView(
       scrollDirection: Axis.horizontal,
               child: Row(
@@ -195,7 +213,6 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
                         dossier.numero_repertoire,
                         'N° DE REPERTOIRE : ',
                         Colors.green, type: "date")
-
                   ],
 
                 )
@@ -203,6 +220,180 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
               ]
           ),
              ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.numeroBLS == null && dossier.numeroBLS != "")  ? "RAS" :
+                          dossier.numeroBLS,
+                          'N° BL/LTA : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.numeroDeclaration == null && dossier.numeroDeclaration != "")  ? "RAS" :
+                          dossier.numeroDeclaration,
+                          'N° DECLARATION : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.montant_facture == null && dossier.montant_facture != "")  ? "RAS" :
+                          dossier.montant_facture,
+                          'MONTANT FACTURE : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      (dossier.ensemble_numeros_containers.isNotEmpty && dossier.ensemble_numeros_containers.length < 25) ?
+                      NiceText((dossier.ensemble_numeros_containers == null && dossier.ensemble_numeros_containers != "")  ? "AUCUN CONTENEUR" : dossier.ensemble_numeros_containers, 'N° CONTENEURS : ', Colors.green, type: "date") :
+                      NiceText((dossier.ensemble_numeros_containers == null && dossier.ensemble_numeros_containers != "")  ? "AUCUN CONTENEUR" : dossier.ensemble_numeros_containers, 'N° CONTENEURS : ', Colors.green, type: "date",goToLine: true)
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.Recap_nbreColis == null && dossier.Recap_nbreColis != "")  ? "RAS" :
+                          dossier.Recap_nbreColis,
+                          'NOMBRE DE COLIS : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.Recap_poids == null && dossier.Recap_poids != "")  ? "RAS" :
+                          dossier.Recap_poids,
+                          'POIDS : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.frais_dossiers == null && dossier.frais_dossiers != "")  ? "0" :
+                          dossier.frais_dossiers,
+                          'TOTAL FRAIS : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+
+            child : Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Column(
+                    children: [
+
+                      NiceText(
+                          (dossier.date_mise_en_livraison == null && dossier.date_mise_en_livraison != "")  ? "RAS" :
+                          dossier.date_mise_en_livraison,
+                          'DATE LIVRAISON : ',
+                          Colors.green, type: "date")
+                    ],
+
+                  )
+
+                ]
+            ),
+          ),
+
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
 
