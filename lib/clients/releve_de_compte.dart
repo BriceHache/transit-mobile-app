@@ -807,6 +807,7 @@ class _ReleveDeComptePageState extends State<ReleveDeComptePage> {
      paymentInfo: "",
     baseColor: PdfColors.teal,
     accentColor: PdfColors.blueGrey900,
+    soldeGlobal: current_client.solde
   );
 
   return await releve.buildPdf(pageFormat);

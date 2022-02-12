@@ -18,6 +18,7 @@ class Releve {
      this.paymentInfo,
      this.baseColor,
      this.accentColor,
+     this.soldeGlobal
   });
 
   final List<GetClientDetails> transactions;
@@ -28,6 +29,7 @@ class Releve {
   final String paymentInfo;
   final PdfColor baseColor;
   final PdfColor accentColor;
+  final String soldeGlobal;
 
   static const _darkColor = PdfColors.blueGrey800;
   static const _lightColor = PdfColors.white;
@@ -55,7 +57,6 @@ class Releve {
 
 
   double get _en_cours =>  _total_debit - _total_credit;
-
 
   var formater = NumberFormat('###,000' '');
 
@@ -221,7 +222,8 @@ class Releve {
             height: 70,
             child: pw.FittedBox(
               child: pw.Text(
-                'ENCOURS : ' + formater.format(_en_cours).toString() + " " + devise,
+                //'ENCOURS SUR LA PERIODE : ' + formater.format(_en_cours).toString() + " " + devise,  // Encours sur la période
+                'ENCOURS GLOBAL : ' + soldeGlobal + " " + devise,
                 style: pw.TextStyle(
                   color: baseColor,
                   fontStyle: pw.FontStyle.italic,
@@ -353,7 +355,7 @@ class Releve {
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
-                      pw.Text('ENCOURS:'),
+                      pw.Text('ENCOURS SUR LA PERIODE : '),
                       pw.Text(formater.format(_en_cours).toString() + " " + devise),
                     ],
                   ),

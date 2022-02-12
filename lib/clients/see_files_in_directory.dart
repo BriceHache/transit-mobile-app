@@ -79,20 +79,50 @@ class _SeeDirectoryFilesPageState extends State<SeeDirectoryFiles> {
           itemCount: files?.length ?? 0,
           itemBuilder: (context, index) {
             return Card(
-                child:ListTile(
-                  title: Text(files[index].path.split('/').last),
-                  leading: Icon(Icons.picture_as_pdf),
-                  trailing: Icon(Icons.arrow_forward, color: Colors.redAccent,),
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context){
-                      return
-                        SeeInternalDocument(
-                            path:files[index].path.toString(),
-                            title:files[index].path.split('/').last
-                        );
-                      //open viewPDF page on click
-                    }));
+                child:Dismissible(
+                  direction: DismissDirection.startToEnd,
+                  key: Key(files[index]),
+                  onDismissed: (direction) async {
+                    try {
+                      if (await File(files[index].path.toString()).exists()) {
+                          File(files[index].path.toString()).delete();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Le fichier a été supprimé avec succès.'),
+                            ),
+                          );
+                        }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Erreur lors de l\'accès au fichier.'),
+                        ),
+                      );
+                    }
                   },
+                  background: Container(
+                    padding: EdgeInsets.only(left: 28.0),
+                    alignment: AlignmentDirectional.centerStart,
+                    color: Colors.red,
+                    child: Icon(Icons.delete_forever, color: Colors.white,),
+                  ),
+                  child :
+                    ListTile(
+                      title: Text(files[index].path.split('/').last),
+                      leading: Icon(Icons.picture_as_pdf),
+                      trailing: Icon(Icons.arrow_forward, color: Colors.redAccent,),
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context){
+                          return
+                            SeeInternalDocument(
+                                path:files[index].path.toString(),
+                                title:files[index].path.split('/').last
+                            );
+                          //open viewPDF page on click
+                        }));
+                      },
+                    ),
+                  
                 )
             );
           },
