@@ -268,6 +268,17 @@ class _ReleveDeComptePageState extends State<ReleveDeComptePage> {
               },
             ),
             IconButton(
+              icon: Icon(Icons.remove_red_eye_rounded,
+                  //color: Colors.red
+                  color: Theme.of(context).accentColor
+              ),
+              onPressed: () {
+
+                _seeDocs();
+                //currentFile.writeAsBytes(bytes);
+              },
+            ),
+            IconButton(
               icon: Icon(FontAwesomeIcons.times,
                 color: Theme.of(context).accentColor,),
               onPressed: (){Navigator.of(context).pop();},

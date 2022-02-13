@@ -31,11 +31,13 @@ class _SeeDirectoryFilesPageState extends State<SeeDirectoryFiles> {
 
   String _targetDirectory;
   String _title;
+  //bool isEmpty;
 
   var files;
 
    @override
   void initState() {
+     //isEmpty = false;
      getFiles();
     super.initState();
      _targetDirectory = widget.targetDirectory;
@@ -56,6 +58,12 @@ class _SeeDirectoryFilesPageState extends State<SeeDirectoryFiles> {
         extensions: ["pdf"], //optional, to filter files, list only pdf files
         sortedBy: FileManagerSorting.Date
     );
+   /* setState(() {
+      if( files?.length == 0){
+        isEmpty = true;
+      }else{
+        isEmpty = false;
+      }*/
     setState(() {}); //update the UI
   }
 
@@ -74,23 +82,33 @@ class _SeeDirectoryFilesPageState extends State<SeeDirectoryFiles> {
               onPressed: (){Navigator.of(context).pop();},
             )],
         ),
-        body: files == null? Text("Searching Files"):
+       // body: files == null ? Text("Aucun relevé de compte disponible.", style: TextStyle(color: Colors.white, fontSize: 16.0)):
+        body: files?.length == 0 ? Text("Aucun relevé de compte disponible.", style: TextStyle(color: Colors.white, fontSize: 16.0)):
         ListView.builder(  //if file/folder list is grabbed, then show here
           itemCount: files?.length ?? 0,
           itemBuilder: (context, index) {
             return Card(
                 child:Dismissible(
                   direction: DismissDirection.startToEnd,
-                  key: Key(files[index]),
+                  //key: Key(files[index].toString()),
+                  key: UniqueKey(),
                   onDismissed: (direction) async {
                     try {
-                      if (await File(files[index].path.toString()).exists()) {
-                          File(files[index].path.toString()).delete();
+                      File file = File(files[index].path.toString());
+                      if (await file.exists()) {
+                          file.delete();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Le fichier a été supprimé avec succès.'),
                             ),
                           );
+                          /*setState(() {
+                           if( files?.length == 0){
+                             isEmpty = true;
+                           }else{
+                             isEmpty = false;
+                           }
+                          });*/
                         }
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(

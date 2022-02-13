@@ -38,5 +38,15 @@ class KeyValueModel {
         return data;
     }
 
+    String getIndex(int index) {
+        switch (index) {
+            case 0:
+                return Text;
+            case 1:
+                return Value;
+        }
+        return '';
+    }
+
 
 }
