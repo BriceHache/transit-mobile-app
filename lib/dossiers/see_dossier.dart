@@ -476,10 +476,23 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
         await Permission.storage.request();
       }
 
-      String doc_name = "Dossier N° "+ dossier.numero_dossier + "-" + dossier.ClientName
-          + ' Au ' +
+      // Redéfinition du nom du dossier
+
+      String dossier_final_name = "";
+
+      List<String> doc_split_name = dossier.numero_dossier.split("/");
+
+      if(doc_split_name.length == 2){
+        dossier_final_name = dossier_final_name + doc_split_name[0] + '_' +doc_split_name[1];
+      }else{
+        dossier_final_name = dossier_final_name + doc_split_name[0];
+      }
+
+      String doc_name = "Dossier_n°_"
+          + "_" + dossier_final_name
+          + '_au_' +
           DateFormat('dd_MM_yyyy').format(DateTime.now()).toString();
-      final output = '/storage/emulated/0/Download/CTI/Dossiers';
+      final output = '/storage/emulated/0/Download/CTI/Dossiers_' + dossier.ClientName;
       String path = output +"/" + doc_name;
 
       var file = new File(path).create(recursive: true)
@@ -495,7 +508,7 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
 
       showDialog(
         builder: (context) =>  AlertDialog(
-          title: Text( 'Situation du dossier N° ' + dossier.numero_dossier ),
+          title: Text( 'Situation du dossier N° ' + dossier.numero_dossier + ' Au ' +  DateFormat('dd/MM/yyyy').format(DateTime.now()).toString()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -666,7 +679,6 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
         dossier.StatusName.toUpperCase()
         )
     );
-
 
     final detail_dossier = DossierDetail(
         details: _dossierDetails,

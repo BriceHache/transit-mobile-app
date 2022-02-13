@@ -83,7 +83,7 @@ class _SeeDirectoryFilesPageState extends State<SeeDirectoryFiles> {
             )],
         ),
        // body: files == null ? Text("Aucun relevé de compte disponible.", style: TextStyle(color: Colors.white, fontSize: 16.0)):
-        body: files?.length == 0 ? Text("Aucun relevé de compte disponible.", style: TextStyle(color: Colors.white, fontSize: 16.0)):
+        body: files?.length == 0 ? Text("Aucun fichier disponible.", style: TextStyle(color: Colors.white, fontSize: 16.0)):
         ListView.builder(  //if file/folder list is grabbed, then show here
           itemCount: files?.length ?? 0,
           itemBuilder: (context, index) {
