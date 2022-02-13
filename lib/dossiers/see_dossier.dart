@@ -491,7 +491,7 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
       String doc_name = "Dossier_n°_"
           + "_" + dossier_final_name
           + '_au_' +
-          DateFormat('dd_MM_yyyy').format(DateTime.now()).toString();
+          DateFormat('dd_MM_yyyy').format(DateTime.now()).toString()+ '.pdf';
       final output = '/storage/emulated/0/Download/CTI/Dossiers_' + dossier.ClientName;
       String path = output +"/" + doc_name;
 
@@ -589,12 +589,6 @@ class _SeeDossierPageState extends State<SeeDossierPage> {
        Value :
        (dossier.date_booking_string == null && dossier.date_booking_string != "")  ? "RAS" :
         dossier.date_booking_string)
-    );
-    _dossierDetails
-        .add(new KeyValueModel(
-        Text: 'N° DOSSIER : ',
-        Value :
-        dossier.numero_dossier)
     );
     _dossierDetails
         .add(new KeyValueModel(

@@ -226,7 +226,8 @@ class DossierDetail {
         color: baseColor,
       ),
       headerHeight: 25,
-      cellHeight: 40,
+      cellHeight: 35,
+      //cellHeight: 40,
       cellAlignments: {
         0: pw.Alignment.center,
         1: pw.Alignment.centerLeft
