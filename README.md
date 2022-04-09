@@ -1,4 +1,4 @@
-# ball_on_a_budget_planner
+# Application dedicated to freight forwarders and logisticians
 
 A new Flutter project.
 
